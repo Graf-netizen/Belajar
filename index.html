@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- >>> BISA DIGANTI: judul yang tampil di tab browser (nama aplikasi terpasang ada di manifest.json: "name" dan "short_name") -->
 <title>BELAJAR</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#4f46e5">
@@ -94,6 +95,7 @@ body.dark-mode #aiFab{background:rgba(24,35,56,.94);color:#b6c2d6;border-color:r
 <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
 <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 <div class="flex items-center cursor-pointer" onclick="goHomeSafe()">
+<!-- >>> BISA DIGANTI: nama aplikasi di bagian atas layar -->
 <div id="headerTitle"><h1 class="font-extrabold text-xl tracking-widest text-indigo-600">BELAJAR</h1></div>
 </div>
 <div class="flex items-center space-x-2">
@@ -108,7 +110,9 @@ body.dark-mode #aiFab{background:rgba(24,35,56,.94);color:#b6c2d6;border-color:r
 
 <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col">
 <div id="homeView">
+<!-- >>> BISA DIGANTI: judul dan kalimat pengantar halaman beranda -->
 <div class="mb-6"><h2 class="text-2xl font-bold mb-1">Folder Mata Pelajaran</h2><p class="text-slate-600 text-sm">Pilih pelajaran untuk mulai memilih dan mengerjakan soal.</p></div>
+<!-- >>> BISA DIGANTI: kartu mata pelajaran di beranda (ikon emoji dan nama). Nama pelajaran juga muncul di: pilihan "Target Folder" (id targetSubject), filter Riwayat (id historyFilter), pilihan Prompt AI (id aiSubject), dan SUBJECT_NAME di script -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition cursor-pointer" onclick="openSubject('indo')">
 <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-2xl mb-4">📘</div>
@@ -134,6 +138,7 @@ body.dark-mode #aiFab{background:rgba(24,35,56,.94);color:#b6c2d6;border-color:r
 <div id="settingDesc" class="grid grid-cols-4 gap-2"></div>
 <div>
 <label class="block text-sm font-medium mb-1">Pilih Durasi Ujian:</label>
+<!-- >>> BISA DIGANTI: pilihan durasi ujian (value = menit, 0 = tanpa batas waktu) -->
 <select id="durationSelect" onchange="toggleCustomDuration()" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white">
 <option value="60">1 Jam (60 Menit)</option><option value="120">2 Jam (120 Menit)</option><option value="custom">Waktu Custom...</option><option value="0">Tanpa Batas Waktu</option>
 </select>
@@ -226,6 +231,7 @@ body.dark-mode #aiFab{background:rgba(24,35,56,.94);color:#b6c2d6;border-color:r
 <p id="confirmMsg" class="text-sm text-slate-700"></p>
 <div class="flex justify-end gap-2"><button id="confirmNo" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg">Batal</button><button id="confirmYes" class="px-4 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg">Ya</button></div>
 </div></div>
+<!-- >>> BISA DIGANTI: kalimat pengantar jendela Prompt AI (isi prompt-nya ada di fungsi buildAiPrompt di script) -->
 <div id="aiModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[66] flex items-center justify-center hidden p-4">
 <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[88vh] flex flex-col overflow-hidden">
 <div class="p-4 border-b border-slate-200 flex justify-between items-center"><h3 class="font-bold text-base">Prompt AI</h3><button onclick="closeAi()" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Tutup">✕</button></div>
@@ -273,6 +279,7 @@ body.dark-mode #aiFab{background:rgba(24,35,56,.94);color:#b6c2d6;border-color:r
 </div>
 <button onclick="saveMateriEdit()" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Simpan Materi</button>
 </div></div></div>
+<!-- >>> BISA DIGANTI: teks bantuan (tombol ?) di menu Materi -->
 <div id="materiHelpModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[66] flex items-center justify-center hidden p-4">
 <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[88vh] flex flex-col overflow-hidden">
 <div class="p-4 border-b border-slate-200 flex justify-between items-center"><h3 class="font-bold text-base">Pengaturan Materi</h3><button onclick="closeMateriHelp()" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Tutup">✕</button></div>
@@ -288,6 +295,7 @@ body.dark-mode #aiFab{background:rgba(24,35,56,.94);color:#b6c2d6;border-color:r
 <section class="space-y-1"><h4 class="font-bold text-slate-800 text-sm">Penyimpanan</h4>
 <p>Semua materi dan file tersimpan di browser perangkat ini (maks. 20 MB per file). Menghapus data browser akan menghapus materi.</p></section>
 </div></div></div>
+<!-- >>> BISA DIGANTI: teks penjelasan di menu Cadangan -->
 <div id="backupModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[66] flex items-center justify-center hidden p-4">
 <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[88vh] flex flex-col overflow-hidden">
 <div class="p-4 border-b border-slate-200 flex justify-between items-center"><h3 class="font-bold text-base">Cadangan Data</h3><button onclick="closeBackup()" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Tutup">✕</button></div>
@@ -340,6 +348,7 @@ body.dark-mode #aiFab{background:rgba(24,35,56,.94);color:#b6c2d6;border-color:r
 </div>
 </div>
 
+<!-- >>> BISA DIGANTI: teks bantuan (tombol ?) di menu Kelola Soal, termasuk contoh format soal -->
 <div id="manageHelpModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[66] flex items-center justify-center hidden p-4">
 <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[88vh] flex flex-col overflow-hidden">
 <div class="p-4 border-b border-slate-200 flex justify-between items-center"><h3 class="font-bold text-base">Cara Mengisi Paket Soal</h3><button onclick="closeManageHelp()" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Tutup">✕</button></div>
@@ -374,7 +383,7 @@ C. opsi
 D. opsi
 Kunci: B
 Pembahasan: penjelasan singkat</pre>
-<ul class="list-disc pl-4 space-y-0.5"><li>Nomor soal harus berurutan (1, 2, 3, ...).</li><li>PG kompleks: <code>Kunci: A, C</code></li><li class="indo-only">Benar/Salah: tanpa opsi, <code>Kunci: Benar</code></li></ul></section>
+<ul class="list-disc pl-4 space-y-0.5"><li>Nomor soal harus berurutan (1, 2, 3, ...).</li><li>PG kompleks: <code>Kunci: A, C</code></li><li class="indo-only">PG Kategori: tulis baris <code>Kategori: Benar | Salah</code> sebelum pernyataan A, B, C, lalu <code>Kunci: Benar, Salah, Benar</code></li></ul></section>
 <section class="space-y-1"><h4 class="font-bold text-slate-800 text-sm">Rumus matematika</h4>
 <p>Stimulus, pertanyaan, opsi, dan pembahasan mendukung LaTeX. Tulis rumus di antara tanda dolar: <code>$x^2+3x$</code>, <code>$\frac{a}{b}$</code>, <code>$\sqrt{16}$</code>. Untuk tanda dolar biasa, tulis <code>\$</code>.</p></section>
 <section class="space-y-1"><h4 class="font-bold text-slate-800 text-sm">Gambar stimulus (opsional)</h4>
@@ -393,9 +402,12 @@ Pembahasan: penjelasan singkat</pre>
 
 <script>
 // ===== Pengaturan pola soal: ubah di sini =====
+// >>> BISA DIGANTI: PER_STIMULUS = jumlah soal per stimulus Bahasa Indonesia, MTK_PER_STIMULUS = untuk Matematika
+// >>> BISA DIGANTI: INDO_PATTERN = urutan jenis soal tiap stimulus Bahasa Indonesia. Pilihan jenis: pg, pgk, bs, kat (jumlah isinya harus sama dengan PER_STIMULUS)
 const PER_STIMULUS = 5;
 const MTK_PER_STIMULUS = 3;
-const INDO_PATTERN = ['pg', 'pg', 'pg', 'pgk', 'bs']; // 3 PG, 1 PG kompleks, 1 Benar/Salah
+const INDO_PATTERN = ['pg', 'pg', 'pg', 'pgk', 'kat']; // 3 PG, 1 PG kompleks, 1 PG kompleks kategori
+// >>> BISA DIGANTI: TYPE_LABEL = kalimat petunjuk di atas pertanyaan, TYPE_SHORT = nama pendek jenis soal
 const TYPE_LABEL = {
   pg: 'Pilihan Ganda: pilih satu jawaban',
   pgk: 'Pilihan Ganda Kompleks: pilih lebih dari satu jawaban',
@@ -404,6 +416,7 @@ const TYPE_LABEL = {
 };
 const TYPE_SHORT = { pg: 'Pilihan Ganda', pgk: 'PG Kompleks', bs: 'Benar/Salah', kat: 'PG Kategori' };
 
+// >>> BISA DIGANTI: seluruh bagian DEFAULT_DATA di bawah ini (S1, S2, SM, dan daftar mk(...)) adalah SOAL CONTOH. Isi/hapus sesuka hati
 const mk = (s, t, q, o, a, d, x) => Object.assign({ id: 'd' + Math.random().toString(36).slice(2, 8), packageId: 'demo_pack', packageName: 'Demo Bahasa Indonesia (2 stimulus)', stimulus: s, type: t, question: q, options: o, answer: a, discussion: d }, x || {});
 const BS = ['Benar', 'Salah'];
 const S1 = 'Pencemaran sungai di kawasan perkotaan semakin mengkhawatirkan. Limbah industri yang dibuang tanpa diolah merusak ekosistem sungai. Warga sekitar kesulitan mendapatkan air bersih sehingga harus membeli air isi ulang. Pemerintah daerah berencana memasang instalasi pengolahan limbah dan memperketat pengawasan pabrik.';
@@ -416,12 +429,12 @@ const DEFAULT_DATA = {
     mk(S1, 'pg', 'Dampak langsung bagi warga sekitar adalah ...', ['A. Harga tanah naik', 'B. Pabrik tutup', 'C. Sulit mendapat air bersih', 'D. Jumlah penduduk turun'], 2, 'Warga kesulitan mendapatkan air bersih.'),
     mk(S1, 'pg', 'Gagasan utama paragraf tersebut adalah ...', ['A. Pencemaran sungai merugikan warga dan perlu ditangani', 'B. Air isi ulang lebih sehat', 'C. Pabrik harus dipindahkan', 'D. Sungai kota sangat panjang'], 0, 'Inti teks: pencemaran dan upaya penanganannya.'),
     mk(S1, 'pgk', 'Pilih semua upaya pemerintah daerah yang disebut dalam teks!', ['A. Memasang instalasi pengolahan limbah', 'B. Memperketat pengawasan pabrik', 'C. Memberi subsidi air isi ulang', 'D. Menutup seluruh pabrik'], [0, 1], 'Hanya A dan B yang disebut.'),
-    mk(S1, 'bs', 'Pernyataan: Warga membeli air isi ulang karena air sungai tercemar.', BS, 0, 'Sesuai teks.'),
+    mk(S1, 'kat', 'Tentukan pernyataan berikut benar atau salah berdasarkan teks!', ['A. Warga membeli air isi ulang karena air sungai tercemar.', 'B. Pemerintah daerah berencana memasang instalasi pengolahan limbah.', 'C. Limbah industri sudah diolah sebelum dibuang ke sungai.'], [0, 0, 1], 'A dan B sesuai teks. Pada C, teks menyebut limbah dibuang tanpa diolah.', { cats: ['Benar', 'Salah'] }),
     mk(S2, 'pg', 'Fungsi mangrove menurut teks adalah ...', ['A. Menahan abrasi', 'B. Menghasilkan garam', 'C. Menambah curah hujan', 'D. Menjernihkan udara kota'], 0, 'Mangrove menahan abrasi.'),
     mk(S2, 'pg', 'Mengapa mangrove ditebang?', ['A. Untuk bahan bakar', 'B. Untuk jalan raya', 'C. Untuk dijadikan tambak', 'D. Untuk lahan wisata'], 2, 'Dijadikan tambak.'),
     mk(S2, 'pg', 'Kata "abrasi" dalam teks bermakna ...', ['A. Pengikisan pantai oleh air laut', 'B. Penumpukan pasir', 'C. Pasang air laut', 'D. Penanaman pohon'], 0, 'Abrasi: pengikisan daratan oleh gelombang.'),
     mk(S2, 'pgk', 'Pilih kegiatan nelayan yang sesuai teks!', ['A. Menanam kembali bibit mangrove', 'B. Mengajak sekolah ikut serta', 'C. Membuka tambak baru', 'D. Menjual bibit ke luar negeri'], [0, 1], 'A dan B sesuai teks.'),
-    mk(S2, 'bs', 'Pernyataan: Mangrove tidak berpengaruh pada perkembangbiakan ikan.', BS, 1, 'Teks menyebut mangrove tempat berkembang biak ikan dan udang.')
+    mk(S2, 'kat', 'Tentukan pernyataan berikut benar atau salah berdasarkan teks!', ['A. Mangrove berfungsi menahan abrasi.', 'B. Mangrove tidak berpengaruh pada perkembangbiakan ikan.', 'C. Nelayan menanam kembali bibit mangrove setiap akhir pekan.'], [0, 1, 0], 'B salah karena mangrove menjadi tempat berkembang biak ikan dan udang.', { cats: ['Benar', 'Salah'] })
   ],
   mtk: [
     mk(SM, 'pg', 'Jika $x = 5$, berapa keliling tanah Pak Budi?', ['A. 42 meter', 'B. 36 meter', 'C. 28 meter', 'D. 21 meter'], 0, 'Panjang = 14 m, lebar = 7 m. Keliling = $2 \\times (14 + 7) = 42$ m.', MX),
@@ -620,6 +633,7 @@ function showToast(msg, danger) {
 }
 function hideToast() { clearTimeout(toastTimer); $('toast').classList.add('hidden'); }
 function checkReminders() {
+// >>> BISA DIGANTI: menit sisa waktu saat pengingat muncul
   [15, 5, 1].forEach(min => {
     if (min * 60 < totalSeconds && timeLeft <= min * 60 && timeLeft > 0 && !shownReminders.has(min)) {
       shownReminders.add(min); showToast(`⏰ Sisa waktu ${min} menit!`, min === 1);
@@ -1026,18 +1040,21 @@ function closeManageHelp() { $('manageHelpModal').classList.add('hidden'); }
 function closeManageModal() { $('manageModal').classList.add('hidden'); }
 
 // ===== Prompt AI (per mata pelajaran) =====
+// >>> BISA DIGANTI: DESC_TYPE = deskripsi jenis soal yang dipakai di prompt Bahasa Indonesia. Teks prompt ada di buildAiPrompt: blok if (subject === 'mtk') = prompt MATEMATIKA, blok sesudahnya = prompt BAHASA INDONESIA
 const DESC_TYPE = {
   pg: 'Pilihan Ganda, opsi A sampai D, hanya satu jawaban benar',
   pgk: 'Pilihan Ganda Kompleks, opsi A sampai E, dua atau lebih jawaban benar',
-  bs: 'Benar/Salah, berupa satu pernyataan tanpa opsi A-E'
+  bs: 'Benar/Salah, berupa satu pernyataan tanpa opsi A-E',
+  kat: 'Pilihan Ganda Kompleks Kategori, 3-4 pernyataan (A sampai D), tiap pernyataan dikelompokkan ke satu kategori, misalnya Benar/Salah atau Setuju/Tidak Setuju'
 };
 function buildAiPrompt(subject) {
   const common = [
     'Tulis dalam teks biasa: jangan pakai tabel, huruf tebal/miring, atau markdown lain selain tanda ### yang diminta di bawah. Jangan beri kalimat pembuka atau penutup.',
     '',
-    'Hasilkan DUA BAGIAN terpisah:',
+    'Hasilkan DUA File pdf pada BAGIAN terpisah:',
     ''
   ];
+// >>> BISA DIGANTI: PROMPT MATEMATIKA: semua teks di dalam tanda kutip pada blok ini
   if (subject === 'mtk') {
     const n = MTK_PER_STIMULUS;
     return [
@@ -1078,9 +1095,12 @@ function buildAiPrompt(subject) {
       'Pembahasan: penjelasan singkat 1-2 kalimat',
       '(Urutan kunci sama dengan urutan pernyataan. Kategori boleh diganti, misalnya Kategori: Setuju | Tidak Setuju, dan kunci memakai kata yang sama persis.)',
       '',
-      'Penting: jangan memakai pola "angka titik" (misalnya "2.") di dalam isi soal atau opsi. Setiap soal wajib punya baris Kunci dan Pembahasan.'
+      'Penting: jangan memakai pola "angka titik" (misalnya "2.") di dalam isi soal atau opsi. Setiap soal wajib punya baris Kunci dan Pembahasan.',
+      '',
+      'Gunakan ukuran dan jenis font yang sama'
     ].join('\n');
   }
+// >>> BISA DIGANTI: PROMPT BAHASA INDONESIA: semua teks di dalam tanda kutip pada blok ini
   const n = PER_STIMULUS;
   const pola = INDO_PATTERN.map((t, i) => '  Soal ke-' + (i + 1) + ' dalam tiap stimulus: ' + DESC_TYPE[t]).join('\n');
   return [
@@ -1108,9 +1128,21 @@ function buildAiPrompt(subject) {
     'Aturan kunci:',
     '- Pilihan Ganda: Kunci: B',
     '- Pilihan Ganda Kompleks: Kunci: A, C (huruf dipisah koma)',
-    '- Benar/Salah: Kunci: Benar atau Kunci: Salah (tanpa opsi A-E)',
+    '- Pilihan Ganda Kompleks Kategori: lihat format di bawah',
     '',
-    'Penting: jangan memakai pola "angka titik" (misalnya "2.") di dalam isi soal atau opsi; untuk daftar pernyataan pakai (1), (2), (3) atau huruf. Setiap soal wajib punya baris Kunci dan Pembahasan.'
+    'Format Pilihan Ganda Kompleks Kategori:',
+    '5. Teks pertanyaan',
+    'Kategori: Benar | Salah',
+    'A. pernyataan pertama',
+    'B. pernyataan kedua',
+    'C. pernyataan ketiga',
+    'Kunci: Benar, Salah, Benar',
+    'Pembahasan: penjelasan singkat 1-2 kalimat',
+    '(Urutan kunci sama dengan urutan pernyataan. Kategori boleh diganti, misalnya Kategori: Setuju | Tidak Setuju, dan kunci memakai kata yang sama persis.)',
+    '',
+    'Penting: jangan memakai pola "angka titik" (misalnya "2.") di dalam isi soal atau opsi; untuk daftar pernyataan pakai (1), (2), (3) atau huruf. Setiap soal wajib punya baris Kunci dan Pembahasan.',
+    '',
+    'Gunakan ukuran dan jenis font yang sama'
   ].join('\n');
 }
 function openAi() { $('aiSubject').value = currentSubject === 'mtk' ? 'mtk' : 'indo'; refreshAiPrompt(); $('aiModal').classList.remove('hidden'); }
@@ -1176,6 +1208,7 @@ function saveHistory() {
 }
 function fmtDur(s) { const m = Math.floor(s / 60); return m ? `${m} mnt ${s % 60} dtk` : `${s} dtk`; }
 function scoreColor(s) { return s >= 75 ? 'text-emerald-600' : s >= 50 ? 'text-amber-600' : 'text-rose-600'; }
+// >>> BISA DIGANTI: nama pelajaran di Riwayat
 const SUBJECT_NAME = { indo: 'Bahasa Indonesia', mtk: 'Matematika' };
 
 async function openHistory() {
@@ -1289,6 +1322,7 @@ let materiData = { folders: [] }, materiEditId = null, mDraft = null, readUrls =
 
 // ===== Materi (folder) =====
 let materiFolderId = null;
+// >>> BISA DIGANTI: folder dan materi contoh yang muncul pertama kali (nama folder, judul, isi)
 function materiDefault() {
   const t = Date.now();
   return { folders: [
