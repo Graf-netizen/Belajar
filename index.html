@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="id">
   <head>
@@ -71,7 +72,9 @@
       .custom-scroll::-webkit-scrollbar { width: 6px; }
       .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
       body { background: #f8fafc; }
-      mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+      mjx-container[display="true"] { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+      /* Tailwind membuat semua <svg> bersifat block; rumus inline MathJax (svg) jadi memutus baris. Kembalikan ke inline. */
+      mjx-container svg { display: inline-block; }
       input:not([type="file"]), select, textarea { background-color: #fff; color: #1e293b; }
       input[type="file"] { background: transparent; border: 0; padding: 0; }
       ::placeholder { color: #94a3b8; opacity: 1; }
@@ -143,8 +146,25 @@
       .set-row:hover { background: #f1f5f9; }
       .dark-mode .set-row:hover { background: #1a2438; }
       #quizThemeBtn { display: none; }
-      .in-quiz #quizThemeBtn { display: flex; }
+      .in-quiz #quizThemeBtn { display: flex; margin-left: auto; }
+      .in-quiz header .hdr-title { display: none; }
+      /* Pengaturan saat ujian: kotak kecil di sisi kanan (tanpa latar gelap/blur) */
+      #settingsPanel {
+        position: fixed; right: 0.75rem; left: auto; top: calc(env(safe-area-inset-top, 0px) + 3.75rem);
+        z-index: 66; width: 11.5rem;
+      }
       .in-quiz #bottomNav, .in-quiz #headerTitle, .in-quiz .full-only { display: none; }
+
+      /* Stimulus berupa file (PDF/gambar): terbuka otomatis, bisa zoom */
+      #stimulusContainer.stim-file { max-height: none !important; overflow: hidden; display: flex; flex-direction: column; padding-right: 0 !important; }
+      #stimulusContainer.stim-file .stim-viewport { height: 60vh; min-height: 300px; touch-action: pan-x pan-y; overscroll-behavior: contain; }
+      @media (max-width: 1023px) { #stimulusContainer.stim-file .stim-viewport { height: 52vh; } }
+      #stimulusContainer.stim-full {
+        position: fixed; inset: 0; z-index: 60; background: #fff;
+        padding: calc(env(safe-area-inset-top, 0px) + 0.75rem) 0.75rem calc(env(safe-area-inset-bottom, 0px) + 0.75rem) !important;
+      }
+      #stimulusContainer.stim-full .stim-viewport { flex: 1 1 0; height: auto; min-height: 0; }
+      .dark-mode #stimulusContainer.stim-full { background: #0b1220; }
 
       details > summary { list-style: none; }
       details > summary::-webkit-details-marker { display: none; }
@@ -158,14 +178,14 @@
     <div id="app" class="min-h-screen flex flex-col">
       <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div class="cursor-pointer" onclick="goHomeSafe()">
+          <div class="cursor-pointer hdr-title" onclick="goHomeSafe()">
             <!-- >>> BISA DIGANTI: nama aplikasi di bagian atas layar -->
             <div id="headerTitle">
               <h1 class="font-extrabold text-xl tracking-widest text-indigo-600">BELAJAR</h1>
             </div>
           </div>
           <button id="quizThemeBtn" onclick="openSettings()" aria-label="Pengaturan tema"
-            class="ml-auto w-9 h-9 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200">⚙️</button>
+            class="w-9 h-9 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200">⚙️</button>
         </div>
       </header>
 
@@ -206,7 +226,7 @@
                 <p id="packageEmpty" class="hidden text-slate-400 italic text-center py-4">Belum ada paket. Tambahkan lewat menu Kelola Soal.</p>
                 <p id="packageInfo" class="text-slate-400 mt-1.5"></p>
               </div>
-              <div id="packageActions" class="hidden space-y-5">
+              <div id="packageActions" class="space-y-5">
                 <div>
                   <label class="block font-medium mb-1">Waktu Pengerjaan:</label>
                   <!-- >>> BISA DIGANTI: pilihan durasi ujian (value = menit, 0 = tanpa batas waktu) -->
@@ -229,7 +249,7 @@
                 </label>
                 <div class="flex gap-2">
                   <button onclick="startQuiz()" class="flex-grow py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow transition">Mulai Kerjakan</button>
-                  <button onclick="deleteSelectedPackage()" class="px-4 bg-slate-100 hover:bg-slate-200 text-rose-600 rounded-lg" aria-label="Hapus paket" title="Hapus paket">🗑</button>
+                  <button id="deletePkgBtn" onclick="deleteSelectedPackage()" class="hidden px-4 bg-slate-100 hover:bg-slate-200 text-rose-600 rounded-lg" aria-label="Hapus paket" title="Hapus paket">🗑</button>
                 </div>
               </div>
             </div>
@@ -314,11 +334,24 @@
               <h3 class="font-bold text-sm">Tambah Paket Baru</h3>
               <input type="text" id="packageNameInput" maxlength="80" placeholder="Nama paket (opsional)" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm" />
               <div class="space-y-2">
+                <label class="block font-medium">Cara menampilkan stimulus:</label>
+                <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Cara menampilkan stimulus">
+                  <button type="button" id="stimModeTeks" onclick="setStimMode('teks')" role="radio">
+                    <span class="block font-semibold text-sm">📝 Teks</span>
+                    <span class="block text-[11px] text-slate-500 mt-0.5">File diubah menjadi teks. Soal hanya berupa teks.</span>
+                  </button>
+                  <button type="button" id="stimModeFile" onclick="setStimMode('file')" role="radio">
+                    <span class="block font-semibold text-sm">📄 File</span>
+                    <span class="block text-[11px] text-slate-500 mt-0.5">Terbuka seperti membuka file. 1 stimulus = 1 halaman, bisa diperbesar/diperkecil.</span>
+                  </button>
+                </div>
+                <p id="stimModeHint" class="text-[11px] text-slate-400"></p>
+              </div>
+              <div id="stimTextBox" class="space-y-2">
                 <label class="block font-medium">📄 File 1: Stimulus / Wacana Bacaan</label>
                 <input type="file" id="stimulusFileInput" accept=".pdf,.txt,application/pdf,text/plain" onchange="handleStimulusUpload(event)"
                   class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700" />
                 <p id="stimulusFileStatus" class="text-slate-400 empty:hidden"></p>
-                <textarea id="stimulusTextInput" class="hidden"></textarea>
                 <details class="text-slate-500">
                   <summary class="cursor-pointer py-1">🖼 Gambar untuk stimulus (opsional)</summary>
                   <div class="pt-2 space-y-2">
@@ -328,14 +361,34 @@
                   </div>
                 </details>
               </div>
+              <div id="stimFileBox" class="hidden space-y-2">
+                <label class="block font-medium">📄 File 1: File Stimulus (PDF atau gambar)</label>
+                <input type="file" id="stimFileInput" accept=".pdf,application/pdf,image/*" multiple onchange="handleStimFiles(event)"
+                  class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700" />
+                <div id="stimFileList" class="space-y-1"></div>
+                <p id="stimFileStatus" class="text-slate-400 empty:hidden"></p>
+              </div>
               <div class="space-y-2">
                 <label class="block font-medium">📝 File 2: Daftar Pertanyaan</label>
                 <input type="file" id="soalFileInput" accept=".pdf,.txt,application/pdf,text/plain" onchange="handleSoalUpload(event)"
                   class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-700" />
                 <p id="soalFileStatus" class="text-slate-400 empty:hidden"></p>
-                <textarea id="soalTextInput" class="hidden"></textarea>
               </div>
-              <button onclick="saveDualFileQuestions()" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Proses &amp; Buka Editor</button>
+              <div id="rawEditBox" class="hidden space-y-3 border border-slate-200 rounded-lg p-3 bg-slate-50">
+                <p class="text-[11px] text-slate-400">Perbaiki teks hasil baca file sebelum diproses. Teks juga boleh ditempel langsung tanpa memilih file.</p>
+                <div id="rawStimWrap">
+                  <label class="block font-medium mb-1">Teks stimulus</label>
+                  <textarea id="stimulusTextInput" rows="8" placeholder="### Stimulus 1&#10;Teks wacana..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono"></textarea>
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">Teks soal</label>
+                  <textarea id="soalTextInput" rows="10" placeholder="1. Pertanyaan&#10;A. opsi&#10;B. opsi&#10;Kunci: A&#10;Pembahasan: ..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono"></textarea>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" id="rawEditBtn" onclick="toggleRawEdit()" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">✏️ Ubah Soal</button>
+                <button type="button" onclick="saveDualFileQuestions()" class="py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Proses Soal</button>
+              </div>
             </section>
             <section class="space-y-2">
               <h3 class="font-bold text-sm">Paket Tersimpan <span class="font-normal text-slate-400">· ketuk untuk mengedit</span></h3>
@@ -343,6 +396,15 @@
             </section>
           </div>
           <div id="mgEdit" class="hidden space-y-4"></div>
+        </div>
+        <!-- Pengaturan = halaman penuh (bukan popup) -->
+        <div id="settingsView" class="hidden max-w-2xl mx-auto w-full space-y-4">
+          <h2 class="text-xl font-bold">Pengaturan</h2>
+          <div class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
+            <button class="set-row" onclick="toggleDarkMode()"><span>🌗 Tema</span><span class="theme-label text-xs text-slate-400">Terang</span></button>
+            <button class="set-row" onclick="openAi()"><span>🤖 Buat Prompt AI</span><span class="text-slate-400">›</span></button>
+            <button class="set-row" onclick="openBackup()"><span>💾 Cadangan Data</span><span class="text-slate-400">›</span></button>
+          </div>
         </div>
         <div id="historyView" class="hidden max-w-2xl mx-auto w-full space-y-4">
           <div class="flex items-center justify-between">
@@ -355,7 +417,16 @@
           </div>
           <h2 class="text-xl font-bold">Riwayat Hasil</h2>
           <div id="historySummary" class="grid grid-cols-3 gap-3 text-center text-xs"></div>
-          <div id="historyChart"></div>
+          <div id="chartCard" class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3 gap-2">
+              <div id="chartTitle" class="text-[11px] text-slate-400"></div>
+              <div class="flex bg-slate-100 rounded-lg p-0.5 text-[11px] font-medium shrink-0">
+                <button id="chartBtnBar" onclick="setChartType('bar')" class="px-3 py-1 rounded-md">Diagram Awal</button>
+                <button id="chartBtnPie" onclick="setChartType('pie')" class="px-3 py-1 rounded-md">Lingkaran</button>
+              </div>
+            </div>
+            <div id="historyChart"></div>
+          </div>
           <div id="historyList" class="space-y-2 text-xs"></div>
           <button id="clearHistoryBtn" onclick="clearHistory()" class="text-xs text-rose-600 hover:underline">Hapus Semua Riwayat</button>
         </div>
@@ -372,22 +443,9 @@
       </div>
     </div>
 
-    <!-- Pengaturan: Tema, Prompt AI, Cadangan (saat ujian hanya Tema) -->
-    <div id="settingsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[66] flex items-center justify-center hidden p-4"
-      onclick="if(event.target===this)closeSettings()">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-200 flex justify-between items-center">
-          <h3 class="font-bold text-base">Pengaturan</h3>
-          <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Tutup">✕</button>
-        </div>
-        <div class="p-2">
-          <button class="set-row" onclick="toggleDarkMode()"><span>🌗 Tema</span><span id="themeLabel" class="text-xs text-slate-400">Terang</span></button>
-          <div class="full-only">
-            <button class="set-row" onclick="closeSettings();openAi()"><span>🤖 Buat Prompt AI</span><span class="text-slate-400">›</span></button>
-            <button class="set-row" onclick="closeSettings();openBackup()"><span>💾 Cadangan Data</span><span class="text-slate-400">›</span></button>
-          </div>
-        </div>
-      </div>
+    <!-- Pengaturan saat ujian: kotak kecil di kanan (hanya Tema) -->
+    <div id="settingsPanel" class="hidden bg-white border border-slate-200 rounded-xl shadow-lg p-1.5">
+      <button class="set-row !py-2.5" onclick="toggleDarkMode()"><span>🌗 Tema</span><span class="theme-label text-xs text-slate-400">Terang</span></button>
     </div>
 
     <!-- >>> BISA DIGANTI: kalimat pengantar jendela Prompt AI (isi prompt-nya ada di fungsi buildAiPrompt di script) -->
@@ -398,7 +456,7 @@
           <button onclick="closeAi()" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Tutup">✕</button>
         </div>
         <div class="p-4 overflow-y-auto space-y-3 text-xs text-slate-600 custom-scroll">
-          <p>Salin prompt ini ke ChatGPT, Claude, atau Gemini agar soal dibuat sesuai format aplikasi. Hasilnya terdiri dari dua bagian: stimulus (File 1) dan soal (File 2).</p>
+          <p>Salin prompt ini ke ChatGPT, Claude, atau Gemini agar soal dibuat sesuai format aplikasi. Hasilnya terdiri dari dua bagian: stimulus (File 1) dan soal (File 2). Pilih mode stimulus yang sama dengan pilihan di Kelola Soal.</p>
           <div>
             <label class="block font-medium mb-1">Mata pelajaran:</label>
             <select id="aiSubject" onchange="refreshAiPrompt()" class="w-full p-2 border border-slate-300 rounded-lg">
@@ -406,6 +464,14 @@
               <option value="mtk">Matematika</option>
             </select>
           </div>
+          <div>
+            <label class="block font-medium mb-1">Mode stimulus:</label>
+            <select id="aiMode" onchange="refreshAiPrompt()" class="w-full p-2 border border-slate-300 rounded-lg">
+              <option value="teks">Stimulus teks (dikonversi dari file)</option>
+              <option value="file">Stimulus file (tampil seperti membuka file)</option>
+            </select>
+          </div>
+          <p id="aiHint" class="text-[11px] text-slate-400"></p>
           <textarea id="aiPromptText" readonly rows="14" class="w-full p-2 border border-slate-300 rounded-lg font-mono bg-white text-slate-700"></textarea>
           <button onclick="copyAiPrompt()" id="aiCopyBtn" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700">Salin Prompt</button>
         </div>
@@ -545,12 +611,20 @@
             <h4 class="font-bold text-slate-800 text-sm">Langkah singkat</h4>
             <ol class="list-decimal pl-4 space-y-0.5">
               <li>Pilih folder tujuan. Nama paket boleh dikosongkan.</li>
-              <li>Pilih <b>File 1</b> (stimulus) berformat PDF/TXT.</li>
+              <li>Pilih cara menampilkan stimulus: <b>Teks</b> atau <b>File</b>.</li>
+              <li>Pilih <b>File 1</b> (stimulus): PDF/TXT untuk mode Teks, PDF atau gambar untuk mode File.</li>
               <li>Pilih <b>File 2</b> (soal) berformat PDF/TXT.</li>
-              <li>Tekan <b>Proses &amp; Simpan Paket Soal</b>.</li>
-              <li>Perbaiki isi lewat <b>Ubah Soal</b> bila perlu.</li>
+              <li>Bila perlu, tekan <b>Ubah Soal</b> untuk memperbaiki teks hasil baca file sebelum diproses.</li>
+              <li>Tekan <b>Proses Soal</b>. Paket muncul di <b>Paket Tersimpan</b>.</li>
+              <li>Ketuk paket di <b>Paket Tersimpan</b> untuk mengedit per soal.</li>
             </ol>
             <p>PDF dibaca sebagai teks. PDF hasil scan atau foto tidak bisa dibaca. Untuk membuat soal dengan AI, pakai Pengaturan › Buat Prompt AI.</p>
+          </section>
+          <section class="space-y-1">
+            <h4 class="font-bold text-slate-800 text-sm">Dua cara menampilkan stimulus</h4>
+            <p><b>Teks:</b> File stimulus diubah menjadi teks, jadi stimulus dan soal tampil sebagai teks. Tiap stimulus diawali <code>###</code>. PDF scan/foto tidak bisa dibaca.</p>
+            <p><b>File:</b> File (PDF atau gambar) disimpan apa adanya dan terbuka otomatis saat ujian. <b>1 stimulus = 1 halaman PDF</b> (atau 1 gambar), tidak perlu <code>###</code>. Saat ujian stimulus bisa diperbesar/diperkecil (tombol +/−, Ctrl + roda mouse, atau cubit dua jari) dan dibuka layar penuh. PDF scan pun bisa dipakai. Jumlah halaman harus sama dengan jumlah stimulus.</p>
+            <p class="mtk-only hidden"><b>Matematika:</b> pilih mode File bila stimulus memuat grafik, tabel, bangun datar, atau rumus bersusun yang rusak saat diubah menjadi teks. Pilih mode Teks bila stimulus hanya cerita pendek dengan rumus sederhana. Di kedua mode, soal (File 2) tetap berupa teks dengan rumus LaTeX di antara tanda dolar. Pada mode File, beri label seperti “Gambar 1” atau “Tabel 1” di halaman stimulus agar soal bisa merujuknya.</p>
           </section>
           <section class="indo-only space-y-1">
             <h4 class="font-bold text-slate-800 text-sm">Aturan Bahasa Indonesia</h4>
@@ -572,7 +646,7 @@ Pembahasan: penjelasan singkat</pre>
             <p>Urutan kunci sama dengan urutan pernyataan.</p>
           </section>
           <section class="space-y-1">
-            <h4 class="font-bold text-slate-800 text-sm">Format stimulus (File 1)</h4>
+            <h4 class="font-bold text-slate-800 text-sm">Format stimulus (File 1, mode Teks)</h4>
             <p>Awali tiap stimulus dengan <code>###</code>. Baris yang terpotong di PDF otomatis disambung, dan jarak antarparagraf tetap terbaca.</p>
             <pre class="bg-slate-50 border border-slate-200 rounded-lg p-2 font-mono whitespace-pre-wrap text-slate-700">
 ### Stimulus 1
@@ -786,21 +860,35 @@ Pembahasan: penjelasan singkat</pre>
       let curNav = "beranda";
       const paintNav = (n) =>
         document.querySelectorAll("#bottomNav button").forEach((b) => b.classList.toggle("on", b.dataset.n === n));
+      const inQuizNow = () => !$("quizView").classList.contains("hidden") && !finished;
+      const syncThemeLabel = () =>
+        document.querySelectorAll(".theme-label").forEach((e) => (e.innerText = document.body.classList.contains("dark-mode") ? "Gelap" : "Terang"));
       function openSettings() {
-        paintNav("pengaturan");
-        $("themeLabel").innerText = document.body.classList.contains("dark-mode") ? "Gelap" : "Terang";
-        $("settingsModal").classList.remove("hidden");
+        syncThemeLabel();
+        if (inQuizNow()) {
+          // Mode ujian: kotak kecil di kanan, ujian tidak terganggu
+          $("settingsPanel").classList.toggle("hidden");
+          return;
+        }
+        clearInterval(timerInterval);
+        hideToast();
+        ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "materiView", "manageView"].forEach((id) => $(id).classList.add("hidden"));
+        $("settingsView").classList.remove("hidden");
+        nav("pengaturan");
       }
       function closeSettings() {
-        $("settingsModal").classList.add("hidden");
-        paintNav(curNav);
+        $("settingsPanel").classList.add("hidden");
       }
+      document.addEventListener("click", (e) => {
+        const p = $("settingsPanel");
+        if (!p.classList.contains("hidden") && !p.contains(e.target) && !e.target.closest("#quizThemeBtn")) closeSettings();
+      });
       function toggleDarkMode() {
-        const on = document.body.classList.toggle("dark-mode");
-        $("themeLabel").innerText = on ? "Gelap" : "Terang";
+        document.body.classList.toggle("dark-mode");
+        syncThemeLabel();
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
+            document.addEventListener("DOMContentLoaded", () => {
         $("bottomNav").innerHTML =
           '<div class="max-w-lg mx-auto grid grid-cols-5">' +
           NAV.map(([n, l, fn, d]) =>
@@ -812,7 +900,9 @@ Pembahasan: penjelasan singkat</pre>
         loadHistory();
         loadMateri();
         loadImages();
+        loadStimMeta();
         updateCounts();
+        paintStimMode();
         history.replaceState(null, "", "#beranda");
         $("patternText").innerText = INDO_PATTERN.map((t, i) => i + 1 + "=" + TYPE_SHORT[t]).join(", ");
         if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) toggleDarkMode();
@@ -854,7 +944,7 @@ Pembahasan: penjelasan singkat</pre>
         clearInterval(timerInterval);
         hideToast();
         $("homeView").classList.remove("hidden");
-        ["quizOptionsView", "quizView", "resultView", "historyView", "materiView", "manageView"].forEach((id) => $(id).classList.add("hidden"));
+        ["quizOptionsView", "quizView", "resultView", "historyView", "materiView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
         updateCounts();
       }
       // Menekan folder mata pelajaran: muncul modal pilih paket + waktu pengerjaan
@@ -865,7 +955,7 @@ Pembahasan: penjelasan singkat</pre>
         $("shuffleRow").classList.toggle("hidden", subject !== "mtk");
         $("shuffleChk").checked = true;
         renderQuestionSelectList();
-        ["quizView", "resultView", "historyView", "materiView", "manageView"].forEach((id) => $(id).classList.add("hidden"));
+        ["quizView", "resultView", "historyView", "materiView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
         $("homeView").classList.remove("hidden");
         $("quizOptionsView").classList.remove("hidden");
       }
@@ -882,9 +972,9 @@ Pembahasan: penjelasan singkat</pre>
       function onPackageChange() {
         const u = getUnits(currentSubject).find((x) => x.key === $("packageSelect").value);
         selectedPackageKey = u ? u.key : null;
-        $("packageActions").classList.toggle("hidden", !u);
+        $("deletePkgBtn").classList.toggle("hidden", !u);
         $("packageInfo").innerText = u
-          ? u.questions.length + " soal · " + new Set(u.questions.map((q) => q.stimulus).filter(Boolean)).size + " stimulus"
+          ? u.questions.length + " soal · " + new Set(u.questions.map((q) => (q.stimPage ? "p" + q.stimPage : q.stimulus)).filter(Boolean)).size + " stimulus"
           : "";
       }
       function deleteSelectedPackage() {
@@ -901,6 +991,7 @@ Pembahasan: penjelasan singkat</pre>
         questionsData[currentSubject] = questionsData[currentSubject].filter((q) => (q.packageId || q.id) !== key);
         delete packageImages[key];
         saveImages();
+        await dropStimFiles(key);
         saveToLocalStorage();
         renderQuestionSelectList();
       }
@@ -918,7 +1009,7 @@ Pembahasan: penjelasan singkat</pre>
         const out = [];
         let g = [], last = null;
         qs.forEach((q) => {
-          const s = q.stimulus || "";
+          const s = (q.stimPage || "") + "|" + (q.stimulus || "");
           if (g.length && s !== last) { out.push(...shuf(g)); g = []; }
           g.push(q);
           last = s;
@@ -949,6 +1040,7 @@ Pembahasan: penjelasan singkat</pre>
         endTime = startTime + totalSeconds * 1000;
         shownReminders = new Set();
         hideToast();
+        resetStimViewer();
         $("jumpQuestionSelect").innerHTML = currentQuestions.map((_, i) => `<option value="${i}">Loncat ke Nomor ${i + 1}</option>`).join("");
         closeSetting();
         $("homeView").classList.add("hidden");
@@ -1017,10 +1109,14 @@ Pembahasan: penjelasan singkat</pre>
         $("questionNumberIndicator").innerText =
           `Soal ${currentIndex + 1} dari ${currentQuestions.length}` + (revisit ? " · Tinjau Ragu-Ragu" : "");
         $("jumpQuestionSelect").value = currentIndex;
-        $("stimulusContainer").innerHTML =
-          q.stimulus || (packageImages[q.packageId] || []).length
-            ? stimHtml(q)
-            : '<i class="text-slate-400">Tidak ada stimulus khusus untuk nomor ini.</i>';
+        if (q.stimPage) showStimFile(q);
+        else {
+          hideStimFile();
+          $("stimulusContainer").innerHTML =
+            q.stimulus || (packageImages[q.packageId] || []).length
+              ? stimHtml(q)
+              : '<i class="text-slate-400">Tidak ada stimulus khusus untuk nomor ini.</i>';
+        }
         $("questionText").innerHTML =
           `<div class="text-[11px] font-semibold text-indigo-600 mb-2">${esc(TYPE_LABEL[type])}</div>` + esc(q.question);
         const container = $("optionsContainer"), cur = userAnswers[currentIndex];
@@ -1107,6 +1203,7 @@ Pembahasan: penjelasan singkat</pre>
         let correct = 0, wrong = 0, blank = 0, ragu = 0;
         const review = $("reviewList");
         review.innerHTML = "";
+        const detail = [];
         currentQuestions.forEach((q, idx) => {
           const ua = userAnswers[idx];
           let status;
@@ -1114,6 +1211,15 @@ Pembahasan: penjelasan singkat</pre>
           else if (isCorrect(q, ua)) { correct++; status = "Benar"; }
           else { wrong++; status = "Salah"; }
           if (raguState[idx]) ragu++;
+          if (status !== "Benar")
+            detail.push({
+              n: idx + 1,
+              s: status,
+              t: TYPE_SHORT[q.type || "pg"],
+              q: String(q.question || "").slice(0, 240),
+              a: answered(ua) ? fmtAns(q, ua) : "",
+              k: hasKey(q) ? fmtAns(q, q.answer) : "",
+            });
           const color = status === "Benar" ? "text-emerald-600" : status === "Salah" ? "text-rose-600" : "text-slate-500";
           const div = document.createElement("div");
           div.className = "bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-1";
@@ -1132,7 +1238,7 @@ Pembahasan: penjelasan singkat</pre>
           subject: currentSubject,
           packages: [...new Set(currentQuestions.map((q) => q.packageName || "Soal Demo"))],
           total: currentQuestions.length,
-          correct, wrong, blank, ragu, score,
+          correct, wrong, blank, ragu, score, detail,
           seconds: Math.round((Date.now() - startTime) / 1000),
         });
         saveHistory();
@@ -1162,7 +1268,7 @@ Pembahasan: penjelasan singkat</pre>
           st.innerText =
             "✅ " + file.name + ": " + text.length + " karakter terbaca" +
             (reflow ? ", " + splitStimuli(text).length + " stimulus terdeteksi" : "") +
-            ". Isi bisa diperbaiki lewat Ubah Soal setelah disimpan.";
+            ". Isi bisa diperbaiki lewat tombol Ubah Soal sebelum diproses.";
           return true;
         } catch (err) {
           st.className = "text-rose-600";
@@ -1407,19 +1513,21 @@ Pembahasan: penjelasan singkat</pre>
         };
       }
 
-      function saveDualFileQuestions() {
+      async function saveDualFileQuestions() {
         try {
-          saveDualFileQuestionsImpl();
+          await saveDualFileQuestionsImpl();
         } catch (err) {
           showToast("Gagal menyimpan: " + (err && err.message ? err.message : err), true);
         }
       }
-      function saveDualFileQuestionsImpl() {
+      async function saveDualFileQuestionsImpl() {
         imgNote = "";
-        const stimulusText = normalizeImportedText($("stimulusTextInput").value);
+        const fileMode = stimMode === "file";
+        const stimulusText = fileMode ? "" : normalizeImportedText($("stimulusTextInput").value);
         const soalText = normalizeImportedText($("soalTextInput").value);
         const target = $("targetSubject").value;
-        if (!soalText) { showToast("Pilih file soal terlebih dahulu.", true); return; }
+        if (!soalText) { showToast("Pilih file soal atau isi teks soal lewat tombol Ubah Soal terlebih dahulu.", true); return; }
+        if (fileMode && !pendingStimFiles.length) { showToast("Pilih file stimulus (PDF atau gambar) terlebih dahulu.", true); return; }
 
         const packageId = "pack_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
         const soalFile = $("soalFileInput").files[0];
@@ -1428,33 +1536,41 @@ Pembahasan: penjelasan singkat</pre>
           typedName || (soalFile ? soalFile.name.replace(/\.[^.]+$/, "") : "Paket Impor " + new Date().toLocaleString("id-ID"));
 
         const isIndo = target === "indo", per = isIndo ? PER_STIMULUS : MTK_PER_STIMULUS;
-        const stimuli = splitStimuli(stimulusText);
-        const single = !isIndo && stimuli.length <= 1;
+        const stimuli = fileMode ? [] : splitStimuli(stimulusText);
+        const nStim = fileMode ? pendingStimFiles.reduce((a, x) => a + x.pages, 0) : stimuli.length;
+        const single = !isIndo && nStim <= 1;
         const raw = splitQuestionBlocks(soalText);
         const blocks = raw.map((x) => x.text), nums = raw.map((x) => x.n);
         const base = nums.length ? nums[0] : 1;
         const needed = Math.ceil((nums.length ? nums[nums.length - 1] - base + 1 : 0) / per);
         const warnStim =
-          !single && stimuli.length < needed
-            ? " Stimulus terdeteksi " + stimuli.length + " dari " + needed + " yang dibutuhkan; sisanya tanpa stimulus (beri tanda ### di tiap stimulus)."
-            : "";
+          !single && nStim < needed
+            ? fileMode
+              ? " File stimulus hanya punya " + nStim + " halaman dari " + needed + " yang dibutuhkan; soal sisanya tanpa stimulus."
+              : " Stimulus terdeteksi " + nStim + " dari " + needed + " yang dibutuhkan; sisanya tanpa stimulus (beri tanda ### di tiap stimulus)."
+            : fileMode && !single && nStim > needed
+              ? " File stimulus punya " + nStim + " halaman, tetapi soal hanya memakai " + needed + " halaman pertama."
+              : "";
 
         const imported = blocks
-          .map((b, i) =>
-            parseQuestionBlock(
+          .map((b, i) => {
+            const k = single ? 0 : Math.floor((nums[i] - base) / per);
+            const q = parseQuestionBlock(
               b,
-              single ? stimuli[0] || "" : stimuli[Math.floor((nums[i] - base) / per)] || "",
+              single ? stimuli[0] || "" : stimuli[k] || "",
               packageId, packageName,
               isIndo ? INDO_PATTERN[(nums[i] - base) % PER_STIMULUS] : "auto",
-            ),
-          )
+            );
+            if (q && fileMode && k < nStim) q.stimPage = k + 1;
+            return q;
+          })
           .filter(Boolean);
         if (!imported.length) {
           showToast("Tidak ada soal yang terdeteksi. Pastikan soal diberi nomor (1. 2. 3. ...) dan teksnya tidak kosong.", true);
           return;
         }
         const warnImg =
-          pendingImages.length && !MARK.test(stimulusText)
+          !fileMode && pendingImages.length && !MARK.test(stimulusText)
             ? " Gambar dipasang otomatis berurutan (#1 di Stimulus 1, #2 di Stimulus 2, dst.)."
             : "";
         let warnType = "";
@@ -1464,8 +1580,25 @@ Pembahasan: penjelasan singkat</pre>
             warnType = " Jenis soal terdeteksi: " + c("pg") + " PG, " + c("pgk") + " PG Kompleks, " + c("kat") + " PG Kategori (idealnya sama banyak).";
         }
 
+        if (fileMode) {
+          const metas = [];
+          try {
+            for (let i = 0; i < pendingStimFiles.length; i++) {
+              const pf = pendingStimFiles[i], id = "sf_" + packageId + "_" + i;
+              await idbPut(id, pf.file);
+              metas.push({ id, name: pf.name, type: pf.type, size: pf.size, pages: pf.pages });
+            }
+            stimFiles[packageId] = { files: metas };
+            if (!saveStimMeta()) throw new Error("meta");
+          } catch (err) {
+            delete stimFiles[packageId];
+            metas.forEach((m) => idbDel(m.id).catch(() => {}));
+            showToast("Gagal menyimpan file stimulus (penyimpanan browser penuh atau diblokir). Paket tidak ditambahkan.", true);
+            return;
+          }
+        }
         questionsData[target].push(...imported);
-        if (pendingImages.length) {
+        if (!fileMode && pendingImages.length) {
           packageImages[packageId] = pendingImages.slice();
           if (!saveImages()) {
             delete packageImages[packageId];
@@ -1477,8 +1610,13 @@ Pembahasan: penjelasan singkat</pre>
         ["stimulusFileStatus", "soalFileStatus"].forEach((id) => { $(id).innerText = ""; });
         pendingImages = [];
         renderPendingImages();
+        pendingStimFiles = [];
+        renderStimFileList();
+        $("stimFileStatus").innerText = "";
+        $("stimFileInput").value = "";
         renderCustomList();
-        openMgEdit(packageId);
+        toggleRawEdit(false);
+        $("customQuestionsList").scrollIntoView({ behavior: "smooth", block: "start" });
 
         const review = imported.filter((q) => q.needsReview).length;
         showToast(
@@ -1592,7 +1730,314 @@ Pembahasan: penjelasan singkat</pre>
         renderPendingImages();
       }
 
+      // ===== Stimulus berupa FILE (PDF / gambar): terbuka otomatis, 1 stimulus = 1 halaman, bisa zoom =====
+      let stimMode = "teks", pendingStimFiles = [], stimFiles = {};
+      function loadStimMeta() {
+        try {
+          stimFiles = JSON.parse(localStorage.getItem("tka_master_stimfiles_v1") || "{}") || {};
+        } catch (e) {
+          stimFiles = {};
+        }
+      }
+      function saveStimMeta() {
+        try {
+          localStorage.setItem("tka_master_stimfiles_v1", JSON.stringify(stimFiles));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+      // Halaman ke-n (mulai 1) dari seluruh file stimulus satu paket.
+      function stimPageInfo(pkg, n) {
+        const m = stimFiles[pkg];
+        if (!m) return null;
+        let k = n;
+        for (const f of m.files) {
+          if (k <= f.pages) return { file: f, page: k };
+          k -= f.pages;
+        }
+        return null;
+      }
+      async function dropStimFiles(pkg) {
+        const m = stimFiles[pkg];
+        if (!m) return;
+        for (const f of m.files) {
+          try { await idbDel(f.id); } catch (e) {}
+        }
+        delete stimFiles[pkg];
+        saveStimMeta();
+      }
+      function toggleRawEdit(force) {
+        const box = $("rawEditBox");
+        const on = force === undefined ? box.classList.contains("hidden") : force;
+        box.classList.toggle("hidden", !on);
+        $("rawEditBtn").innerText = on ? "✕ Tutup Ubah Soal" : "✏️ Ubah Soal";
+        if (on) $("rawStimWrap").classList.toggle("hidden", stimMode === "file");
+      }
+      function setStimMode(m) {
+        stimMode = m;
+        paintStimMode();
+      }
+      const STIM_HINT = {
+        "indo-teks": "File stimulus (PDF/TXT) dibaca menjadi teks. Cocok untuk wacana bacaan. PDF scan/foto tidak bisa dibaca.",
+        "indo-file": "File (PDF atau gambar) disimpan apa adanya dan terbuka otomatis saat ujian. 1 stimulus = 1 halaman PDF (atau 1 gambar). PDF scan pun bisa. Jumlah halaman harus sama dengan jumlah stimulus.",
+        "mtk-teks": "Matematika · Teks: cocok untuk cerita pendek dengan rumus sederhana. Tulis rumus dengan LaTeX ($...$) sebagai teks biasa. Gambar, grafik, dan tabel tidak ikut terbaca.",
+        "mtk-file": "Matematika · File: cocok bila stimulus memuat grafik, tabel, bangun datar, atau rumus bersusun. 1 halaman = 1 stimulus, tiap 3 soal memakai 1 halaman. Soal (File 2) tetap berupa teks dengan rumus LaTeX ($...$). Beri label “Gambar 1” / “Tabel 1” di halaman agar soal bisa merujuknya.",
+      };
+      function paintStimMode() {
+        if (!$("stimModeTeks")) return;
+        const on = "border-indigo-600 bg-indigo-50 text-indigo-900", off = "border-slate-300 bg-white hover:bg-slate-50";
+        [["teks", "stimModeTeks"], ["file", "stimModeFile"]].forEach(([m, id]) => {
+          const b = $(id);
+          b.className = "text-left p-3 border rounded-lg transition " + (stimMode === m ? on : off);
+          b.setAttribute("aria-checked", String(stimMode === m));
+        });
+        $("stimTextBox").classList.toggle("hidden", stimMode !== "teks");
+        $("rawStimWrap").classList.toggle("hidden", stimMode === "file");
+        $("stimFileBox").classList.toggle("hidden", stimMode !== "file");
+        $("stimModeHint").innerText = STIM_HINT[($("targetSubject").value === "mtk" ? "mtk" : "indo") + "-" + stimMode];
+      }
+      async function countPdfPages(f) {
+        if (isImg(f)) return 1;
+        if (!window.pdfjsLib) throw new Error("pembaca PDF belum termuat, periksa koneksi internet");
+        const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+        const n = pdf.numPages;
+        try { pdf.destroy(); } catch (e) {}
+        return n;
+      }
+      async function handleStimFiles(e) {
+        const st = $("stimFileStatus"), bad = [];
+        st.className = "text-slate-500";
+        st.innerText = "⏳ Membaca file...";
+        for (const f of Array.from(e.target.files)) {
+          if (!isImg(f) && !isPdf(f)) { bad.push(f.name + " (hanya PDF atau gambar)"); continue; }
+          try {
+            pendingStimFiles.push({ file: f, name: f.name, type: isPdf(f) ? "application/pdf" : f.type, size: f.size, pages: await countPdfPages(f) });
+          } catch (err) {
+            bad.push(f.name + " (" + (err && err.message ? err.message : "gagal dibaca") + ")");
+          }
+        }
+        e.target.value = "";
+        renderStimFileList();
+        if (bad.length) {
+          st.className = "text-rose-600";
+          st.innerText = "❌ Tidak bisa dipakai: " + bad.join("; ");
+        }
+      }
+      function renderStimFileList() {
+        const list = $("stimFileList"), st = $("stimFileStatus");
+        list.innerHTML = pendingStimFiles
+          .map(
+            (x, i) => `<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+      <span>${isImg(x) ? "🖼" : "📄"}</span><span class="flex-grow min-w-0 truncate">${esc(x.name)}</span>
+      <span class="text-slate-400 whitespace-nowrap">${x.pages} hal.</span>
+      <button onclick="moveStimFile(${i},-1)" class="px-1.5 text-slate-500 hover:text-slate-800" aria-label="Naikkan">↑</button>
+      <button onclick="moveStimFile(${i},1)" class="px-1.5 text-slate-500 hover:text-slate-800" aria-label="Turunkan">↓</button>
+      <button onclick="removeStimFile(${i})" class="px-1.5 text-rose-600" aria-label="Hapus">✕</button></div>`,
+          )
+          .join("");
+        const total = pendingStimFiles.reduce((a, x) => a + x.pages, 0);
+        if (total) {
+          st.className = "text-emerald-600";
+          st.innerText = "✅ " + total + " stimulus (halaman) siap dipakai. Stimulus 1 = halaman 1, dan seterusnya, sesuai urutan di atas.";
+        } else st.innerText = "";
+      }
+      function moveStimFile(i, d) {
+        const j = i + d;
+        if (j < 0 || j >= pendingStimFiles.length) return;
+        [pendingStimFiles[i], pendingStimFiles[j]] = [pendingStimFiles[j], pendingStimFiles[i]];
+        renderStimFileList();
+      }
+      function removeStimFile(i) {
+        pendingStimFiles.splice(i, 1);
+        renderStimFileList();
+      }
+
+      // --- Penampil stimulus file saat ujian ---
+      let stimZoom = 1, stimTok = 0, paintTok = 0, stimCache = {}, stimUrls = [], lastStimKey = null, stimPaintTimer = null;
+      const ZMIN = 0.5, ZMAX = 4;
+      function resetStimViewer() {
+        stimUrls.forEach((u) => URL.revokeObjectURL(u));
+        stimUrls = [];
+        stimCache = {};
+        stimTok++;
+        paintTok++;
+        hideStimFile();
+      }
+      function hideStimFile() {
+        lastStimKey = null;
+        $("stimulusContainer").classList.remove("stim-file", "stim-full");
+        $("stimulusTitle").innerText = "Stimulus / Teks Bacaan";
+      }
+      function stimBlob(f) {
+        if (!stimCache[f.id]) {
+          stimCache[f.id] = idbGet(f.id).then((b) => {
+            if (!b) throw new Error("File stimulus tidak ditemukan di penyimpanan browser (data situs mungkin terhapus).");
+            return b;
+          });
+          stimCache[f.id].catch(() => { delete stimCache[f.id]; });
+        }
+        return stimCache[f.id];
+      }
+      function stimPdf(f) {
+        const k = "pdf:" + f.id;
+        if (!stimCache[k]) {
+          if (!window.pdfjsLib) return Promise.reject(new Error("Pembaca PDF belum termuat. Periksa koneksi internet."));
+          stimCache[k] = stimBlob(f).then((b) => b.arrayBuffer()).then((buf) => pdfjsLib.getDocument({ data: buf }).promise);
+          stimCache[k].catch(() => { delete stimCache[k]; });
+        }
+        return stimCache[k];
+      }
+      function showStimFile(q) {
+        const box = $("stimulusContainer"), key = q.packageId + "#" + q.stimPage;
+        if (lastStimKey === key && $("stimViewport")) return; // stimulus sama: jangan dimuat ulang (zoom tetap)
+        lastStimKey = key;
+        stimZoom = 1;
+        const tok = ++stimTok;
+        paintTok++;
+        box.classList.add("stim-file");
+        box.classList.remove("stim-full");
+        $("stimulusTitle").innerText = "Stimulus " + q.stimPage + " · File";
+        const bt = "h-8 rounded-lg bg-slate-100 hover:bg-slate-200 font-medium";
+        box.innerHTML = `<div class="flex items-center gap-1.5 mb-2 flex-wrap text-xs shrink-0">
+      <button data-z="out" class="w-8 ${bt} text-base font-bold" aria-label="Perkecil">−</button>
+      <span id="stimZoomLbl" class="w-12 text-center font-mono">100%</span>
+      <button data-z="in" class="w-8 ${bt} text-base font-bold" aria-label="Perbesar">+</button>
+      <button data-z="fit" class="px-2.5 ${bt}">Pas</button>
+      <span class="flex-grow"></span>
+      <button data-z="full" id="stimFullBtn" class="px-2.5 ${bt}">⤢ Layar penuh</button></div>
+      <div id="stimViewport" class="stim-viewport overflow-auto border border-slate-200 rounded-lg bg-slate-100 custom-scroll"><div id="stimStage" style="width:100%;margin:0 auto"></div></div>`;
+        bindStimViewport($("stimViewport"));
+        drawStim(stimPageInfo(q.packageId, q.stimPage), tok);
+      }
+      async function drawStim(info, tok) {
+        const stage = $("stimStage");
+        if (!stage) return;
+        stage.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">⏳ Membuka file...</div>';
+        try {
+          if (!info) throw new Error("File stimulus untuk nomor ini tidak ditemukan.");
+          const f = info.file;
+          if (isImg(f)) {
+            const blob = await stimBlob(f);
+            let url = stimCache["url:" + f.id];
+            if (!url) { url = stimCache["url:" + f.id] = URL.createObjectURL(blob); stimUrls.push(url); }
+            if (tok !== stimTok) return;
+            stage.innerHTML = `<img src="${url}" alt="Stimulus" draggable="false" style="width:100%;height:auto;display:block;background:#fff">`;
+          } else {
+            const pdf = await stimPdf(f), page = await pdf.getPage(info.page);
+            if (tok !== stimTok) return;
+            const base = page.getViewport({ scale: 1 }), c = document.createElement("canvas");
+            c.width = Math.round(base.width);
+            c.height = Math.round(base.height);
+            c.style.cssText = "width:100%;height:auto;display:block;background:#fff";
+            stage.innerHTML = "";
+            stage._page = page;
+            stage.appendChild(c);
+            await paintStimCanvas();
+          }
+        } catch (err) {
+          if (tok !== stimTok) return;
+          stage.innerHTML = '<div class="p-6 text-center text-rose-500 text-xs">' + esc(err && err.message ? err.message : "File stimulus gagal dibuka.") + "</div>";
+        }
+      }
+      // Gambar ulang halaman PDF sesuai zoom supaya tetap tajam.
+      async function paintStimCanvas() {
+        const stage = $("stimStage"), vp = $("stimViewport");
+        const page = stage && stage._page, c = stage && stage.querySelector("canvas");
+        if (!page || !c || !vp) return;
+        const my = ++paintTok;
+        if (stage._task) { try { stage._task.cancel(); } catch (e) {} }
+        const base = page.getViewport({ scale: 1 }), dpr = Math.min(window.devicePixelRatio || 1, 2);
+        let scale = Math.min((vp.clientWidth * stimZoom * dpr) / base.width, 5);
+        const maxPx = 16e6;
+        if (base.width * base.height * scale * scale > maxPx) scale = Math.sqrt(maxPx / (base.width * base.height));
+        const v = page.getViewport({ scale }), off = document.createElement("canvas");
+        off.width = Math.round(v.width);
+        off.height = Math.round(v.height);
+        try {
+          const task = page.render({ canvasContext: off.getContext("2d"), viewport: v });
+          stage._task = task;
+          await task.promise;
+        } catch (e) { return; }
+        if (my !== paintTok || !c.isConnected) return;
+        c.width = off.width;
+        c.height = off.height;
+        c.getContext("2d").drawImage(off, 0, 0);
+      }
+      function setStimZoom(z) {
+        const vp = $("stimViewport"), stage = $("stimStage");
+        if (!vp || !stage) return;
+        z = Math.min(ZMAX, Math.max(ZMIN, Math.round(z * 100) / 100));
+        if (z === stimZoom) return;
+        const cx = (vp.scrollLeft + vp.clientWidth / 2) / (vp.scrollWidth || 1), cy = (vp.scrollTop + vp.clientHeight / 2) / (vp.scrollHeight || 1);
+        stimZoom = z;
+        stage.style.width = z * 100 + "%";
+        vp.scrollLeft = cx * vp.scrollWidth - vp.clientWidth / 2;
+        vp.scrollTop = cy * vp.scrollHeight - vp.clientHeight / 2;
+        $("stimZoomLbl").innerText = Math.round(z * 100) + "%";
+        clearTimeout(stimPaintTimer);
+        stimPaintTimer = setTimeout(paintStimCanvas, 160);
+      }
+      function toggleStimFull(force) {
+        const box = $("stimulusContainer");
+        const on = force === undefined ? !box.classList.contains("stim-full") : force;
+        box.classList.toggle("stim-full", on);
+        const b = $("stimFullBtn");
+        if (b) b.innerText = on ? "✕ Tutup layar penuh" : "⤢ Layar penuh";
+        setTimeout(paintStimCanvas, 60);
+      }
+      function bindStimViewport(vp) {
+        // Ctrl + roda mouse / cubit di trackpad
+        vp.addEventListener("wheel", (e) => {
+          if (!e.ctrlKey) return;
+          e.preventDefault();
+          setStimZoom(stimZoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+        }, { passive: false });
+        // cubit dua jari di layar sentuh
+        let d0 = 0, z0 = 1;
+        const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        vp.addEventListener("touchstart", (e) => { if (e.touches.length === 2) { d0 = dist(e.touches); z0 = stimZoom; } }, { passive: true });
+        vp.addEventListener("touchmove", (e) => {
+          if (e.touches.length === 2 && d0) { e.preventDefault(); setStimZoom((z0 * dist(e.touches)) / d0); }
+        }, { passive: false });
+        vp.addEventListener("touchend", (e) => { if (e.touches.length < 2) d0 = 0; });
+        // geser dengan mouse
+        let drag = null;
+        vp.addEventListener("pointerdown", (e) => {
+          if (e.pointerType !== "mouse" || e.button !== 0) return;
+          drag = { x: e.clientX, y: e.clientY, l: vp.scrollLeft, t: vp.scrollTop };
+          vp.setPointerCapture(e.pointerId);
+          vp.style.cursor = "grabbing";
+        });
+        vp.addEventListener("pointermove", (e) => {
+          if (!drag) return;
+          vp.scrollLeft = drag.l - (e.clientX - drag.x);
+          vp.scrollTop = drag.t - (e.clientY - drag.y);
+        });
+        const end = () => { drag = null; vp.style.cursor = ""; };
+        vp.addEventListener("pointerup", end);
+        vp.addEventListener("pointercancel", end);
+        vp.addEventListener("dblclick", () => setStimZoom(stimZoom > 1.01 ? 1 : 2));
+      }
+      $("stimulusContainer").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-z]");
+        if (!b) return;
+        const a = b.dataset.z;
+        if (a === "in") setStimZoom(stimZoom * 1.25);
+        else if (a === "out") setStimZoom(stimZoom / 1.25);
+        else if (a === "fit") setStimZoom(1);
+        else if (a === "full") toggleStimFull();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && $("stimulusContainer").classList.contains("stim-full")) toggleStimFull(false);
+      });
+      window.addEventListener("resize", () => {
+        clearTimeout(stimPaintTimer);
+        stimPaintTimer = setTimeout(paintStimCanvas, 200);
+      });
+
       function onTargetChange() {
+        paintStimMode();
         const ind = $("targetSubject").value === "indo";
         document.querySelectorAll(".indo-only").forEach((el) => el.classList.toggle("hidden", !ind));
         document.querySelectorAll(".mtk-only").forEach((el) => el.classList.toggle("hidden", ind));
@@ -1602,7 +2047,7 @@ Pembahasan: penjelasan singkat</pre>
       function openManage() {
         nav("kelola");
         hideToast();
-        ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "materiView"].forEach((id) => $(id).classList.add("hidden"));
+        ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "materiView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
         $("manageView").classList.remove("hidden");
         $("mgEdit").classList.add("hidden");
         $("mgMain").classList.remove("hidden");
@@ -1624,33 +2069,88 @@ Pembahasan: penjelasan singkat</pre>
         bs: "Benar/Salah, berupa satu pernyataan tanpa opsi A-E",
         kat: "Pilihan Ganda Kompleks Kategori, 3-4 pernyataan (A sampai D), tiap pernyataan dikelompokkan ke satu kategori, misalnya Benar/Salah atau Setuju/Tidak Setuju",
       };
-      function buildAiPrompt(subject) {
-        const common = [
-          "Tulis dalam teks biasa: jangan pakai tabel, huruf tebal/miring, atau markdown lain selain tanda ### yang diminta di bawah. Jangan beri kalimat pembuka atau penutup.",
-          "",
-          "Hasilkan DUA File pdf pada BAGIAN terpisah:",
-          "",
-        ];
-        // >>> BISA DIGANTI: PROMPT MATEMATIKA: semua teks di dalam tanda kutip pada blok ini
-        if (subject === "mtk") {
-          const n = MTK_PER_STIMULUS;
-          return [
-            "Buatkan soal latihan Matematika untuk [JENJANG, mis. SMP] dengan topik: [ISI TOPIK]. Jumlah stimulus: [JUMLAH].",
-            ...common,
-            "=== BAGIAN 1: STIMULUS ===",
+      // mode: "teks" = stimulus dikonversi dari file menjadi teks; "file" = stimulus tampil sebagai file (1 halaman = 1 stimulus)
+      function buildAiPrompt(subject, mode) {
+        const isMtk = subject === "mtk", file = mode === "file";
+        const per = isMtk ? MTK_PER_STIMULUS : PER_STIMULUS;
+        const noSoal =
+          "Nomor soal berurutan dan tidak diulang dari 1: stimulus 1 = nomor 1-" + per + ", stimulus 2 = nomor " + (per + 1) + "-" + 2 * per + ", dan seterusnya.";
+        const L = [];
+
+        // >>> BISA DIGANTI: kalimat pembuka prompt
+        L.push(
+          isMtk
+            ? "Buatkan soal latihan Matematika untuk [JENJANG, mis. SMP] dengan topik: [ISI TOPIK]. Jumlah stimulus: [JUMLAH]."
+            : "Buatkan soal latihan Bahasa Indonesia untuk [JENJANG, mis. SMP] dengan topik: [ISI TOPIK]. Jumlah stimulus: [JUMLAH].",
+        );
+        L.push(
+          file
+            ? "Untuk BAGIAN 2 (soal), tulis dalam teks biasa: jangan pakai tabel, huruf tebal/miring, atau markdown lain. Jangan beri kalimat pembuka atau penutup."
+            : "Tulis dalam teks biasa: jangan pakai tabel, huruf tebal/miring, atau markdown lain selain tanda ### yang diminta di bawah. Jangan beri kalimat pembuka atau penutup.",
+        );
+        L.push("", "Hasilkan DUA File pdf pada BAGIAN terpisah:", "");
+
+        // ---------- BAGIAN 1: STIMULUS ----------
+        if (file) {
+          L.push(
+            "=== BAGIAN 1: FILE STIMULUS (DITAMPILKAN SEBAGAI FILE, BUKAN DIBACA SEBAGAI TEKS) ===",
+            "- Satu stimulus = tepat SATU halaman PDF. Jumlah halaman sama dengan jumlah stimulus: halaman 1 = Stimulus 1, halaman 2 = Stimulus 2, dan seterusnya. Jangan buat halaman sampul, daftar isi, atau halaman kosong.",
+          );
+          if (isMtk)
+            L.push(
+              "- Setiap stimulus adalah konteks berbeda berupa cerita, situasi sehari-hari, atau data. Boleh memuat grafik, tabel, diagram, bangun datar/ruang, atau rumus bersusun, tetapi semuanya harus muat utuh dalam satu halaman.",
+              '- Beri label pada setiap objek visual, misalnya "Gambar 1", "Tabel 1", "Grafik 1", supaya soal bisa merujuknya.',
+              "- Semua angka, satuan, dan keterangan yang dibutuhkan soal harus terbaca jelas di halaman (panjang sisi, besar sudut, skala dan nama sumbu, nilai pada tabel).",
+              "- Rumus di halaman stimulus boleh ditampilkan dengan tampilan rumus biasa (bukan kode LaTeX).",
+            );
+          else
+            L.push(
+              "- Setiap stimulus adalah teks wacana yang berbeda (1-3 paragraf) dan harus muat utuh dalam satu halaman. Tabel, infografik, atau gambar pendukung boleh disertakan selama tetap satu halaman.",
+            );
+          L.push(
+            "- Kertas A4 tegak, margin cukup, tulisan tidak terpotong, dan font mudah dibaca di layar HP (minimal 12 pt).",
+            '- Tulis judul kecil di bagian atas halaman: "Stimulus 1", "Stimulus 2", dan seterusnya. Jangan beri nomor halaman, header, atau footer.',
+            "- File ini ditampilkan apa adanya, jadi tidak perlu penanda ###.",
+            "- Jika kamu tidak bisa membuat file PDF, tulis isi tiap halaman stimulus dan pisahkan dengan baris === HALAMAN 1 ===, === HALAMAN 2 ===, dst., supaya saya bisa menempelkannya ke dokumen dan mengekspornya menjadi PDF (satu stimulus per halaman).",
+          );
+        } else if (isMtk) {
+          L.push(
+            "=== BAGIAN 1: STIMULUS (DIKONVERSI MENJADI TEKS) ===",
             "- Setiap stimulus adalah konteks berbeda berupa cerita, situasi sehari-hari, atau data (1-2 paragraf).",
             "- Awali tiap stimulus dengan satu baris penanda: ### Stimulus 1, ### Stimulus 2, dan seterusnya.",
-            "",
+            '- Stimulus hanya berupa teks, tanpa gambar. Jika soal membutuhkan gambar, grafik, atau tabel, uraikan dengan kata dan angka yang lengkap, misalnya "Segitiga ABC siku-siku di B dengan AB = $6$ cm dan BC = $8$ cm". Tabel ditulis sebagai baris teks biasa dengan pemisah " | ".',
+            "- File harus berisi teks yang bisa disorot (bukan gambar atau hasil scan), karena akan dikonversi menjadi teks.",
+          );
+        } else {
+          L.push(
+            "=== BAGIAN 1: STIMULUS (DIKONVERSI MENJADI TEKS) ===",
+            "- Setiap stimulus adalah teks wacana yang berbeda (1-3 paragraf).",
+            "- Awali tiap stimulus dengan satu baris penanda: ### Stimulus 1, ### Stimulus 2, dan seterusnya.",
+            "- File harus berisi teks yang bisa disorot (bukan gambar atau hasil scan), karena akan dikonversi menjadi teks.",
+          );
+        }
+        L.push("");
+
+        // ---------- BAGIAN 2: SOAL ----------
+        if (isMtk) {
+          L.push(
             "=== BAGIAN 2: SOAL ===",
-            "- Tiap stimulus memiliki tepat " + n + " soal. Nomor soal berurutan dan tidak diulang dari 1: stimulus 1 = nomor 1-" + n + ", stimulus 2 = nomor " + (n + 1) + "-" + 2 * n + ", dan seterusnya.",
+            "- Tiap stimulus memiliki tepat " + per + " soal. " + noSoal,
             "- Ketiga soal di tiap stimulus harus berjenis berbeda:",
             "  a. Pilihan Ganda: opsi A sampai D, hanya satu jawaban benar.",
             "  b. Pilihan Ganda Kompleks: opsi A sampai E, dua atau lebih jawaban benar.",
             "  c. Pilihan Ganda Kompleks Kategori: 3-4 pernyataan (A, B, C, D), tiap pernyataan dikelompokkan ke satu kategori, misalnya Benar/Salah atau Setuju/Tidak Setuju.",
             "- Acak urutan ketiga jenis itu antar stimulus. Jangan selalu menaruh Pilihan Ganda di nomor pertama.",
-            "- Semua soal harus bisa dijawab dari stimulusnya dan punya jawaban yang pasti.",
+            file
+              ? '- Semua soal harus bisa dijawab dari halaman stimulusnya dan punya jawaban yang pasti. Soal boleh merujuk label di stimulus (misalnya "Berdasarkan Tabel 1 pada stimulus ..."); jangan menulis ulang data stimulus yang panjang di dalam soal.'
+              : "- Semua soal harus bisa dijawab dari teks stimulusnya dan punya jawaban yang pasti. Semua angka yang dibutuhkan harus tertulis di stimulus atau di soal.",
+            "- Hitung ulang setiap soal sebelum menulis kunci, kunci harus benar. Jika jawaban dibulatkan, tulis aturan pembulatannya di pertanyaan. Tulis satuan dengan jelas (cm, m², Rp, dst.).",
+            "- Opsi pengecoh berasal dari kesalahan hitung yang umum (salah rumus, salah tanda, lupa satuan), bukan angka asal.",
+            "- Pembahasan berisi langkah hitung singkat, bukan hanya jawaban akhir.",
             "",
-            'Penulisan rumus: tulis semua rumus dan bentuk aljabar dengan LaTeX di antara tanda dolar, misalnya $x^2 + 3x$, $\\frac{a}{b}$, $\\sqrt{16}$, $2 \\times 5$. Rumus boleh dipakai di stimulus, pertanyaan, opsi, dan pembahasan. Untuk mata uang tulis "Rp", jangan pakai tanda dolar.',
+            file
+              ? 'Penulisan rumus di BAGIAN 2 (soal): tulis semua rumus dan bentuk aljabar dengan LaTeX di antara tanda dolar, misalnya $x^2 + 3x$, $\\frac{a}{b}$, $\\sqrt{16}$, $2 \\times 5$. Rumus boleh dipakai di pertanyaan, opsi, dan pembahasan. Untuk mata uang tulis "Rp", jangan pakai tanda dolar.'
+              : 'Penulisan rumus (di stimulus dan soal): tulis semua rumus dan bentuk aljabar dengan LaTeX di antara tanda dolar, misalnya $x^2 + 3x$, $\\frac{a}{b}$, $\\sqrt{16}$, $2 \\times 5$. Tulis LaTeX apa adanya sebagai teks biasa, jangan diubah menjadi rumus visual atau objek persamaan, agar tetap terbaca saat PDF dikonversi menjadi teks. Rumus boleh dipakai di stimulus, pertanyaan, opsi, dan pembahasan. Untuk mata uang tulis "Rp", jangan pakai tanda dolar.',
             "",
             'Format Pilihan Ganda dan Pilihan Ganda Kompleks (nomor di awal baris, ditulis "angka titik spasi"):',
             "1. Teks pertanyaan",
@@ -1673,57 +2173,55 @@ Pembahasan: penjelasan singkat</pre>
             "(Urutan kunci sama dengan urutan pernyataan. Kategori boleh diganti, misalnya Kategori: Setuju | Tidak Setuju, dan kunci memakai kata yang sama persis.)",
             "",
             'Penting: jangan memakai pola "angka titik" (misalnya "2.") di dalam isi soal atau opsi. Setiap soal wajib punya baris Kunci dan Pembahasan.',
+          );
+        } else {
+          const pola = INDO_PATTERN.map((t, i) => "  Soal ke-" + (i + 1) + " dalam tiap stimulus: " + DESC_TYPE[t]).join("\n");
+          L.push(
+            "=== BAGIAN 2: SOAL ===",
+            "- Tiap stimulus memiliki tepat " + per + " soal. " + noSoal,
+            "- Jenis soal di setiap stimulus:",
+            pola,
+            file ? "- Semua soal harus bisa dijawab dari wacana pada halaman stimulusnya." : "- Semua soal harus bisa dijawab dari wacana stimulusnya.",
             "",
-            "Gunakan ukuran dan jenis font yang sama",
-          ].join("\n");
+            'Format tiap soal (nomor di awal baris, ditulis "angka titik spasi"):',
+            "1. Teks pertanyaan",
+            "A. opsi",
+            "B. opsi",
+            "C. opsi",
+            "D. opsi",
+            "Kunci: B",
+            "Pembahasan: penjelasan singkat 1-2 kalimat",
+            "",
+            "Aturan kunci:",
+            "- Pilihan Ganda: Kunci: B",
+            "- Pilihan Ganda Kompleks: Kunci: A, C (huruf dipisah koma)",
+            "- Pilihan Ganda Kompleks Kategori: lihat format di bawah",
+            "",
+            "Format Pilihan Ganda Kompleks Kategori:",
+            "5. Teks pertanyaan",
+            "Kategori: Benar | Salah",
+            "A. pernyataan pertama",
+            "B. pernyataan kedua",
+            "C. pernyataan ketiga",
+            "Kunci: Benar, Salah, Benar",
+            "Pembahasan: penjelasan singkat 1-2 kalimat",
+            "(Urutan kunci sama dengan urutan pernyataan. Kategori boleh diganti, misalnya Kategori: Setuju | Tidak Setuju, dan kunci memakai kata yang sama persis.)",
+            "",
+            'Penting: jangan memakai pola "angka titik" (misalnya "2.") di dalam isi soal atau opsi; untuk daftar pernyataan pakai (1), (2), (3) atau huruf. Setiap soal wajib punya baris Kunci dan Pembahasan.',
+          );
         }
-        // >>> BISA DIGANTI: PROMPT BAHASA INDONESIA: semua teks di dalam tanda kutip pada blok ini
-        const n = PER_STIMULUS;
-        const pola = INDO_PATTERN.map((t, i) => "  Soal ke-" + (i + 1) + " dalam tiap stimulus: " + DESC_TYPE[t]).join("\n");
-        return [
-          "Buatkan soal latihan Bahasa Indonesia untuk [JENJANG, mis. SMP] dengan topik: [ISI TOPIK]. Jumlah stimulus: [JUMLAH].",
-          ...common,
-          "=== BAGIAN 1: STIMULUS ===",
-          "- Setiap stimulus adalah teks wacana yang berbeda (1-3 paragraf).",
-          "- Awali tiap stimulus dengan satu baris penanda: ### Stimulus 1, ### Stimulus 2, dan seterusnya.",
-          "",
-          "=== BAGIAN 2: SOAL ===",
-          "- Tiap stimulus memiliki tepat " + n + " soal. Nomor soal berurutan dan tidak diulang dari 1: stimulus 1 = nomor 1-" + n + ", stimulus 2 = nomor " + (n + 1) + "-" + 2 * n + ", dan seterusnya.",
-          "- Jenis soal di setiap stimulus:",
-          pola,
-          "- Semua soal harus bisa dijawab dari wacana stimulusnya.",
-          "",
-          'Format tiap soal (nomor di awal baris, ditulis "angka titik spasi"):',
-          "1. Teks pertanyaan",
-          "A. opsi",
-          "B. opsi",
-          "C. opsi",
-          "D. opsi",
-          "Kunci: B",
-          "Pembahasan: penjelasan singkat 1-2 kalimat",
-          "",
-          "Aturan kunci:",
-          "- Pilihan Ganda: Kunci: B",
-          "- Pilihan Ganda Kompleks: Kunci: A, C (huruf dipisah koma)",
-          "- Pilihan Ganda Kompleks Kategori: lihat format di bawah",
-          "",
-          "Format Pilihan Ganda Kompleks Kategori:",
-          "5. Teks pertanyaan",
-          "Kategori: Benar | Salah",
-          "A. pernyataan pertama",
-          "B. pernyataan kedua",
-          "C. pernyataan ketiga",
-          "Kunci: Benar, Salah, Benar",
-          "Pembahasan: penjelasan singkat 1-2 kalimat",
-          "(Urutan kunci sama dengan urutan pernyataan. Kategori boleh diganti, misalnya Kategori: Setuju | Tidak Setuju, dan kunci memakai kata yang sama persis.)",
-          "",
-          'Penting: jangan memakai pola "angka titik" (misalnya "2.") di dalam isi soal atau opsi; untuk daftar pernyataan pakai (1), (2), (3) atau huruf. Setiap soal wajib punya baris Kunci dan Pembahasan.',
-          "",
-          "Gunakan ukuran dan jenis font yang sama",
-        ].join("\n");
+        L.push("", "Gunakan ukuran dan jenis font yang sama");
+        return L.join("\n");
       }
+      const AI_HINT = {
+        "indo-teks": "Bahasa Indonesia · Teks: PDF stimulus harus berisi teks yang bisa disorot, tiap stimulus diawali ###.",
+        "indo-file": "Bahasa Indonesia · File: 1 halaman PDF = 1 stimulus (wacana). Jumlah halaman harus sama dengan jumlah stimulus.",
+        "mtk-teks": "Matematika · Teks: stimulus hanya teks. Gambar, grafik, dan tabel harus diuraikan dengan kata dan angka; rumus ditulis LaTeX sebagai teks biasa.",
+        "mtk-file": "Matematika · File: halaman stimulus boleh berisi grafik, tabel, atau bangun, 1 halaman = 1 stimulus. File soal tetap teks dengan rumus LaTeX.",
+      };
       function openAi() {
         $("aiSubject").value = currentSubject === "mtk" ? "mtk" : "indo";
+        $("aiMode").value = stimMode;
         refreshAiPrompt();
         $("aiModal").classList.remove("hidden");
       }
@@ -1731,7 +2229,9 @@ Pembahasan: penjelasan singkat</pre>
         $("aiModal").classList.add("hidden");
       }
       function refreshAiPrompt() {
-        $("aiPromptText").value = buildAiPrompt($("aiSubject").value);
+        const sub = $("aiSubject").value, mode = $("aiMode").value;
+        $("aiPromptText").value = buildAiPrompt(sub, mode);
+        $("aiHint").innerText = AI_HINT[sub + "-" + mode];
       }
       async function copyAiPrompt() {
         const ta = $("aiPromptText"), btn = $("aiCopyBtn");
@@ -1832,9 +2332,9 @@ Pembahasan: penjelasan singkat</pre>
         if (!u) { closeMgEdit(); return; }
         const groups = [];
         u.questions.forEach((q, i) => {
-          const st = q.stimulus || "", g = groups[groups.length - 1];
-          if (g && g.stim === st) g.items.push({ q, i });
-          else groups.push({ stim: st, items: [{ q, i }] });
+          const st = q.stimulus || "", pg = q.stimPage || 0, g = groups[groups.length - 1];
+          if (g && g.stim === st && g.pg === pg) g.items.push({ q, i });
+          else groups.push({ stim: st, pg, items: [{ q, i }] });
         });
         mg.groups = groups.map((g) => g.items.map((x) => x.q.id));
         $("mgMain").classList.add("hidden");
@@ -1846,7 +2346,14 @@ Pembahasan: penjelasan singkat</pre>
           groups
             .map(
               (g, gi) => `<section class="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
-      <div>${mgLbl("Stimulus " + (gi + 1) + " · " + g.items.length + " soal")}<textarea data-f="stim" data-g="${gi}" rows="4" class="${MG_F}">${esc(g.stim)}</textarea></div>
+      ${
+        g.pg
+          ? (() => {
+              const inf = stimPageInfo(mg.pkg, g.pg);
+              return `<div>${mgLbl("Stimulus " + g.pg + " · " + g.items.length + " soal")}<div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-600">📄 File stimulus · halaman ${g.pg}<br><span class="text-[11px] text-slate-400">${esc(inf ? inf.file.name + (inf.file.pages > 1 ? " (hal. " + inf.page + ")" : "") : "file tidak ditemukan")}</span></div></div>`;
+            })()
+          : `<div>${mgLbl("Stimulus " + (gi + 1) + " · " + g.items.length + " soal")}<textarea data-f="stim" data-g="${gi}" rows="4" class="${MG_F}">${esc(g.stim)}</textarea></div>`
+      }
       <div class="space-y-2">${g.items.map((x) => mgQCard(x.q, x.i)).join("")}</div></section>`,
             )
             .join("") +
@@ -1928,6 +2435,7 @@ Pembahasan: penjelasan singkat</pre>
         questionsData[mg.subject] = questionsData[mg.subject].filter((q) => (q.packageId || q.id) !== mg.pkg);
         delete packageImages[mg.pkg];
         saveImages();
+        await dropStimFiles(mg.pkg);
         saveToLocalStorage();
         closeMgEdit();
       }
@@ -1942,9 +2450,15 @@ Pembahasan: penjelasan singkat</pre>
       }
       function saveHistory() {
         examHistory = examHistory.slice(0, 200);
-        try {
-          localStorage.setItem("tka_master_history", JSON.stringify(examHistory));
-        } catch (e) {}
+        for (let i = examHistory.length; i >= 0; i = i > 20 ? i - 20 : i - 1) {
+          try {
+            localStorage.setItem("tka_master_history", JSON.stringify(examHistory));
+            return;
+          } catch (e) {
+            // penyimpanan penuh: buang detail dari riwayat terlama lalu coba lagi
+            for (let j = Math.max(1, i - 20); j < examHistory.length; j++) delete examHistory[j].detail;
+          }
+        }
       }
       function fmtDur(s) {
         const m = Math.floor(s / 60);
@@ -1962,16 +2476,70 @@ Pembahasan: penjelasan singkat</pre>
         }
         clearInterval(timerInterval);
         hideToast();
-        ["homeView", "quizOptionsView", "quizView", "resultView", "materiView", "manageView"].forEach((id) => $(id).classList.add("hidden"));
+        ["homeView", "quizOptionsView", "quizView", "resultView", "materiView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
         $("historyView").classList.remove("hidden");
         nav("riwayat");
         renderHistory();
+      }
+      let chartType = "bar";
+      function setChartType(t) {
+        chartType = t;
+        renderHistory();
+      }
+      function renderHistoryChart(items) {
+        const on = "bg-white text-indigo-600 shadow-sm", off = "text-slate-500";
+        $("chartBtnBar").className = "px-3 py-1 rounded-md " + (chartType === "bar" ? on : off);
+        $("chartBtnPie").className = "px-3 py-1 rounded-md " + (chartType === "pie" ? on : off);
+        const chart = $("historyChart");
+        if (chartType === "bar") {
+          const recent = items.slice(0, 10).reverse();
+          $("chartTitle").innerText = `Perkembangan skor (${recent.length} terakhir)`;
+          chart.innerHTML = `<div class="flex items-end gap-1.5 h-24">${recent
+            .map(
+              (x) => `<div class="flex-1 flex flex-col items-center justify-end h-full" title="${x.score}">
+      <span class="text-[10px] text-slate-500">${x.score}</span>
+      <div class="w-full bg-indigo-500 rounded-t" style="height:${Math.max(3, x.score)}%"></div></div>`,
+            )
+            .join("")}</div>`;
+          return;
+        }
+        const tot = items.reduce((a, x) => ({ c: a.c + x.correct, w: a.w + x.wrong, b: a.b + x.blank }), { c: 0, w: 0, b: 0 });
+        const all = tot.c + tot.w + tot.b;
+        $("chartTitle").innerText = `Komposisi jawaban (${items.length} percobaan, ${all} soal)`;
+        const parts = [
+          ["Benar", tot.c, "#10b981"],
+          ["Salah", tot.w, "#f43f5e"],
+          ["Kosong", tot.b, "#94a3b8"],
+        ];
+        const R = 42, C = 2 * Math.PI * R;
+        let off2 = 0;
+        const arcs = all
+          ? parts
+              .filter((p) => p[1] > 0)
+              .map((p) => {
+                const len = (p[1] / all) * C;
+                const el = `<circle cx="60" cy="60" r="${R}" fill="none" stroke="${p[2]}" stroke-width="18" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off2}" transform="rotate(-90 60 60)"/>`;
+                off2 += len;
+                return el;
+              })
+              .join("")
+          : "";
+        const pct = (v) => (all ? Math.round((v / all) * 100) : 0);
+        chart.innerHTML = `<div class="flex items-center justify-center gap-6 flex-wrap">
+    <svg viewBox="0 0 120 120" class="w-32 h-32" role="img" aria-label="Diagram lingkaran jawaban">
+      <circle cx="60" cy="60" r="${R}" fill="none" stroke="#e2e8f0" stroke-width="18"/>${arcs}
+      <text x="60" y="64" text-anchor="middle" font-size="16" font-weight="700" fill="#4f46e5">${pct(tot.c)}%</text>
+    </svg>
+    <div class="space-y-1.5 text-xs">${parts
+      .map((p) => `<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${p[2]}"></span><span class="w-12">${p[0]}</span><b>${p[1]}</b><span class="text-slate-400">(${pct(p[1])}%)</span></div>`)
+      .join("")}</div></div>`;
       }
       function renderHistory() {
         const f = $("historyFilter").value;
         const items = examHistory.filter((x) => f === "all" || x.subject === f);
         const sum = $("historySummary"), chart = $("historyChart"), list = $("historyList");
         $("clearHistoryBtn").classList.toggle("hidden", !examHistory.length);
+        $("chartCard").classList.toggle("hidden", !items.length);
         if (!items.length) {
           sum.innerHTML = "";
           chart.innerHTML = "";
@@ -1983,35 +2551,62 @@ Pembahasan: penjelasan singkat</pre>
         const best = Math.max(...items.map((x) => x.score));
         const box = (v, l) => `<div class="bg-white border border-slate-200 rounded-xl p-3"><div class="text-lg font-bold text-indigo-600">${v}</div>${l}</div>`;
         sum.innerHTML = box(items.length, "Percobaan") + box(avg, "Rata-rata Skor") + box(best, "Skor Tertinggi");
-        const recent = items.slice(0, 10).reverse();
-        chart.innerHTML = `<div class="bg-white border border-slate-200 rounded-xl p-4">
-    <div class="text-[11px] text-slate-400 mb-2">Perkembangan skor (${recent.length} terakhir)</div>
-    <div class="flex items-end gap-1.5 h-24">${recent
-      .map(
-        (x) => `<div class="flex-1 flex flex-col items-center justify-end h-full" title="${x.score}">
-      <span class="text-[10px] text-slate-500">${x.score}</span>
-      <div class="w-full bg-indigo-500 rounded-t" style="height:${Math.max(3, x.score)}%"></div></div>`,
-      )
-      .join("")}</div></div>`;
+        renderHistoryChart(items);
         list.innerHTML = "";
         items.forEach((x) => {
           const d = new Date(x.time);
           const row = document.createElement("div");
-          row.className = "bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4";
-          row.innerHTML = `<div class="text-2xl font-extrabold w-14 text-center ${scoreColor(x.score)}">${x.score}</div>
+          row.className = "bg-white border border-slate-200 rounded-xl overflow-hidden";
+          row.innerHTML = `<div class="hrow flex items-center gap-4 p-4 cursor-pointer hover:bg-slate-50" role="button" tabindex="0" aria-expanded="false">
+      <div class="text-2xl font-extrabold w-14 text-center ${scoreColor(x.score)}">${x.score}</div>
       <div class="flex-grow min-w-0">
         <div class="font-semibold truncate">${esc(x.packages.join(", "))}</div>
         <div class="text-slate-500">${esc(SUBJECT_NAME[x.subject] || x.subject)} · ${esc(d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }))}, ${esc(d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }))}</div>
         <div class="text-slate-400">${x.correct} benar · ${x.wrong} salah · ${x.blank} kosong · ${x.ragu} ragu · ${esc(fmtDur(x.seconds))}</div>
       </div>
-      <button class="text-slate-400 hover:text-rose-600" aria-label="Hapus">🗑</button>`;
-          row.querySelector("button").onclick = () => {
+      <button class="hdel text-slate-400 hover:text-rose-600 p-1" aria-label="Hapus">🗑</button>
+      <span class="harr text-slate-400 transition-transform">›</span></div>
+      <div class="hdetail hidden border-t border-slate-100 p-4 space-y-3 bg-slate-50"></div>`;
+          const head = row.querySelector(".hrow"), box = row.querySelector(".hdetail");
+          row.querySelector(".hdel").onclick = (ev) => {
+            ev.stopPropagation();
             examHistory = examHistory.filter((h) => h.id !== x.id);
             saveHistory();
             renderHistory();
           };
+          const toggle = () => {
+            const open = box.classList.toggle("hidden") === false;
+            head.setAttribute("aria-expanded", open);
+            row.querySelector(".harr").style.transform = open ? "rotate(90deg)" : "";
+            if (open) {
+              box.innerHTML = historyDetailHtml(x);
+              typeset(box);
+            }
+          };
+          head.onclick = toggle;
+          head.onkeydown = (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(); } };
           list.appendChild(row);
         });
+      }
+      // Rincian soal yang salah / kosong pada satu riwayat
+      function historyDetailHtml(x) {
+        if (!Array.isArray(x.detail))
+          return '<p class="text-slate-400 italic">Riwayat ini dibuat sebelum rincian jawaban disimpan, jadi letak soal yang salah tidak tersedia. Kerjakan ujian baru untuk melihat rincian.</p>';
+        const w = x.detail.filter((d) => d.s === "Salah"), b = x.detail.filter((d) => d.s === "Kosong");
+        const chips = (arr, cls) => arr.map((d) => `<span class="inline-block min-w-[2rem] text-center px-2 py-0.5 rounded-md font-semibold ${cls}">${d.n}</span>`).join(" ");
+        if (!x.detail.length) return '<p class="text-emerald-600 font-semibold">Semua soal dijawab benar. 🎉</p>';
+        return `<div class="space-y-1.5">
+      ${w.length ? `<div><span class="font-semibold text-rose-600">Salah di nomor:</span> ${chips(w, "bg-rose-100 text-rose-700")}</div>` : ""}
+      ${b.length ? `<div><span class="font-semibold text-slate-500">Kosong di nomor:</span> ${chips(b, "bg-slate-200 text-slate-600")}</div>` : ""}</div>
+      <div class="space-y-2">${x.detail
+        .map(
+          (d) => `<div class="bg-white border border-slate-200 rounded-lg p-3 space-y-1">
+        <div class="text-[10px] uppercase tracking-wide text-slate-400">${esc(d.t)}</div>
+        <div class="font-semibold">${d.n}. ${esc(d.q)} <span class="${d.s === "Salah" ? "text-rose-600" : "text-slate-500"}">[${d.s}]</span></div>
+        <div>Jawabanmu: ${d.a ? esc(d.a) : "-"}</div>
+        <div>Kunci: ${d.k ? esc(d.k) : "<i>belum diisi</i>"}</div></div>`,
+        )
+        .join("")}</div>`;
       }
       async function clearHistory() {
         if (!(await askConfirm("Hapus semua riwayat hasil? Tindakan ini tidak bisa dibatalkan.", "Hapus", true))) return;
@@ -2034,7 +2629,7 @@ Pembahasan: penjelasan singkat</pre>
         if (navSuppress) { navSuppress = false; return; }
         closeSetting();
         [
-          "settingsModal", "manageHelpModal", "materiReadModal", "materiEditModal",
+          "settingsPanel", "manageHelpModal", "materiReadModal", "materiEditModal",
           "materiHelpModal", "folderModal", "aiModal", "backupModal",
         ].forEach((id) => $(id).classList.add("hidden"));
         paintNav(curNav);
@@ -2053,10 +2648,11 @@ Pembahasan: penjelasan singkat</pre>
         }
         if (name === "soal") openSubject(currentSubject);
         else if (name === "riwayat") openHistory();
+        else if (name === "pengaturan") openSettings();
         else if (name === "kelola") openManage();
         else if (name === "materi" || name === "materi-folder") openMateri(name === "materi-folder");
         else if (name === "hasil" && resultReady) {
-          ["homeView", "quizOptionsView", "quizView", "historyView", "materiView", "manageView"].forEach((id) => $(id).classList.add("hidden"));
+          ["homeView", "quizOptionsView", "quizView", "historyView", "materiView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
           $("resultView").classList.remove("hidden");
         } else {
           if (name !== "beranda") history.replaceState(null, "", "#beranda");
@@ -2183,7 +2779,7 @@ Pembahasan: penjelasan singkat</pre>
         if (!keepFolder) materiFolderId = null;
         clearInterval(timerInterval);
         hideToast();
-        ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "manageView"].forEach((id) => $(id).classList.add("hidden"));
+        ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
         $("materiView").classList.remove("hidden");
         nav(materiFolderId ? "materi-folder" : "materi");
         renderMateri();
@@ -2581,7 +3177,7 @@ Pembahasan: penjelasan singkat</pre>
       }
 
       // ===== Cadangan data (ekspor/impor) + service worker =====
-      const BACKUP_KEYS = ["tka_master_questions_v2", "tka_master_images_v1", "tka_master_history", "tka_master_materi_v2"];
+      const BACKUP_KEYS = ["tka_master_questions_v2", "tka_master_images_v1", "tka_master_history", "tka_master_materi_v2", "tka_master_stimfiles_v1"];
       const blobToB64 = (b) =>
         new Promise((res, rej) => {
           const r = new FileReader();
@@ -2619,6 +3215,13 @@ Pembahasan: penjelasan singkat</pre>
                 if (b) data.files[x.id] = { type: b.type || x.type, data: await blobToB64(b) };
                 else missing++;
               }
+          for (const m of Object.values(stimFiles))
+            for (const x of m.files || []) {
+              let b = null;
+              try { b = await idbGet(x.id); } catch (e) {}
+              if (b) data.files[x.id] = { type: b.type || x.type, data: await blobToB64(b) };
+              else missing++;
+            }
           const url = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
           const a = document.createElement("a");
           a.href = url;
@@ -2627,7 +3230,7 @@ Pembahasan: penjelasan singkat</pre>
           a.click();
           a.remove();
           setTimeout(() => URL.revokeObjectURL(url), 4000);
-          showToast("✅ Cadangan diunduh." + (missing ? " " + missing + " file materi tidak ditemukan dan tidak ikut." : ""));
+          showToast("✅ Cadangan diunduh." + (missing ? " " + missing + " file (materi/stimulus) tidak ditemukan dan tidak ikut." : ""));
         } catch (err) {
           showToast("Gagal membuat cadangan: " + (err && err.message ? err.message : err), true);
         }
