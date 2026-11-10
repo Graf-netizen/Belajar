@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="id">
   <head>
@@ -7,7 +6,10 @@
     <!-- >>> BISA DIGANTI: judul yang tampil di tab browser (nama aplikasi terpasang ada di manifest.json: "name" dan "short_name") -->
     <title>BELAJAR</title>
     <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="theme-color" content="#1e3a5f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="BELAJAR" />
@@ -41,7 +43,8 @@
         },
       };
     </script>
-    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"
+      onerror="var s=document.createElement('script');s.async=true;s.src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js';document.head.appendChild(s)"></script>
     <style>
       :root {
         box-sizing: border-box;
@@ -50,11 +53,24 @@
       }
       html { scroll-padding-top: env(safe-area-inset-top, 0px); }
       #app { padding-bottom: 5rem; }
+      /* ===== Ukuran teks (diatur lewat variabel --fs) ===== */
+      html { font-size: calc(100% * var(--fs, 1)); }
+      .text-\[15px\] { font-size: calc(15px * var(--fs, 1)); }
+      .text-\[11px\] { font-size: calc(11px * var(--fs, 1)); }
+      .text-\[10px\] { font-size: calc(10px * var(--fs, 1)); }
+      #bottomNav button { font-size: calc(10px * min(var(--fs, 1), 1.2)) !important; }
+      .fs-seg button { flex: 1; padding: 0.55rem 0.25rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #64748b; }
+      .fs-seg button.on { background: #1e3a5f; color: #fff; }
+      .dark-mode .fs-seg button { color: #9aa7bb; }
+      .dark-mode .fs-seg button.on { background: #2c5282; color: #fff; }
+      .fs-step button { width: 2.25rem; height: 2.25rem; border-radius: 0.5rem; font-weight: 700; background: #f1f5f9; color: #334155; }
+      .fs-step button:disabled { opacity: 0.35; }
+      .dark-mode .fs-step button { background: #1a2438; color: #e5e9f0; }
       html, body { overscroll-behavior-y: contain; -webkit-text-size-adjust: 100%; }
       button, select, input, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
       @media (max-width: 640px) {
-        input, select, textarea { font-size: 16px !important; }
-        #optionsContainer button { font-size: 15px; padding: 0.9rem 0.85rem; }
+        input, select, textarea { font-size: calc(16px * var(--fs, 1)) !important; }
+        #optionsContainer button { font-size: calc(15px * var(--fs, 1)); padding: 0.9rem 0.85rem; }
         #quizView button { min-height: 44px; }
         #manageModal > div, #materiReadModal > div, #materiEditModal > div { max-height: 88dvh; }
         #detailModal > div, #quizOptionsView > div { max-height: 88dvh; overflow-y: auto; }
@@ -71,7 +87,26 @@
       header.sticky { top: env(safe-area-inset-top, 0px); }
       .custom-scroll::-webkit-scrollbar { width: 6px; }
       .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-      body { background: #f8fafc; }
+      body { background: #f8fafc; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; letter-spacing: -0.005em; }
+      /* saklar (toggle) */
+      .sw-track { position: relative; width: 2.5rem; height: 1.5rem; border-radius: 9999px; background: #cbd5e1; transition: background-color 0.2s; flex-shrink: 0; }
+      .sw-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 1.25rem; height: 1.25rem; border-radius: 9999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: transform 0.2s; }
+      .sw:checked + .sw-track { background: #1e3a5f; }
+      .sw:checked + .sw-track::after { transform: translateX(1rem); }
+      .sw:focus-visible + .sw-track { outline: 2px solid #1e3a5f; outline-offset: 2px; }
+      .dark-mode .sw-track { background: #3a4a66; }
+      .dark-mode .sw:checked + .sw-track { background: #2c5282; }
+      /* ===== Palet: navy ===== */
+      .bg-indigo-600, .bg-indigo-500 { background-color: #1e3a5f !important; }
+      .hover\:bg-indigo-700:hover { background-color: #16304f !important; }
+      .bg-indigo-50 { background-color: #eaf0f7 !important; }
+      .bg-indigo-100, .hover\:bg-indigo-100:hover { background-color: #dbe5f1 !important; }
+      .border-indigo-600 { border-color: #1e3a5f !important; }
+      .border-indigo-200 { border-color: #b9cbe0 !important; }
+      .text-indigo-600 { color: #1e3a5f !important; }
+      .text-indigo-900 { color: #14283f !important; }
+      .file\:bg-indigo-600::file-selector-button, .file\:bg-amber-600::file-selector-button { background-color: #1e3a5f !important; }
+      .hover\:file\:bg-indigo-700:hover::file-selector-button, .hover\:file\:bg-amber-700:hover::file-selector-button { background-color: #16304f !important; }
       mjx-container[display="true"] { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
       /* Tailwind membuat semua <svg> bersifat block; rumus inline MathJax (svg) jadi memutus baris. Kembalikan ke inline. */
       mjx-container svg { display: inline-block; }
@@ -96,12 +131,17 @@
       }
       .dark-mode ::placeholder { color: #64748b; }
       .dark-mode input[type="file"] { background: transparent !important; border: 0 !important; }
-      .dark-mode .bg-indigo-50 { background: rgba(99, 102, 241, 0.16) !important; }
-      .dark-mode .bg-indigo-50\/50 { background: rgba(99, 102, 241, 0.08) !important; }
-      .dark-mode .border-indigo-200 { border-color: rgba(129, 140, 248, 0.35) !important; }
-      .dark-mode .text-indigo-900 { color: #e0e7ff !important; }
-      .dark-mode .text-indigo-600 { color: #a5b4fc !important; }
-      .dark-mode .hover\:bg-indigo-100:hover { background: rgba(99, 102, 241, 0.28) !important; }
+      .dark-mode .bg-indigo-50 { background: rgba(96, 150, 220, 0.16) !important; }
+      .dark-mode .bg-indigo-50\/50 { background: rgba(96, 150, 220, 0.08) !important; }
+      .dark-mode .border-indigo-200 { border-color: rgba(111, 155, 209, 0.35) !important; }
+      .dark-mode .text-indigo-900 { color: #dce8f7 !important; }
+      .dark-mode .text-indigo-600 { color: #9db9e0 !important; }
+      .dark-mode .hover\:bg-indigo-100:hover { background: rgba(96, 150, 220, 0.28) !important; }
+      .dark-mode .bg-indigo-600, .dark-mode .bg-indigo-500 { background-color: #2c5282 !important; }
+      .dark-mode .hover\:bg-indigo-700:hover { background-color: #36629b !important; }
+      .dark-mode .file\:bg-indigo-600::file-selector-button, .dark-mode .file\:bg-amber-600::file-selector-button { background-color: #2c5282 !important; }
+      .dark-mode .hover\:file\:bg-indigo-700:hover::file-selector-button, .dark-mode .hover\:file\:bg-amber-700:hover::file-selector-button { background-color: #36629b !important; }
+      .dark-mode .border-indigo-600 { border-color: #6f9bd1 !important; }
       .dark-mode .bg-amber-50\/50 { background: rgba(245, 158, 11, 0.07) !important; }
       .dark-mode .bg-amber-50 { background: rgba(245, 158, 11, 0.12) !important; }
       .dark-mode .border-amber-200 { border-color: rgba(245, 158, 11, 0.3) !important; }
@@ -131,14 +171,14 @@
         color: #94a3b8; position: relative; transition: color 0.15s;
       }
       #bottomNav svg { width: 22px; height: 22px; }
-      #bottomNav button.on { color: #4f46e5; }
+      #bottomNav button.on { color: #1e3a5f; }
       #bottomNav button.on::before {
         content: ""; position: absolute; top: 0; width: 28px; height: 3px;
-        border-radius: 0 0 4px 4px; background: #4f46e5;
+        border-radius: 0 0 4px 4px; background: #1e3a5f;
       }
       .dark-mode #bottomNav { background: rgba(17, 27, 46, 0.92); border-color: #26334d; }
-      .dark-mode #bottomNav button.on { color: #a5b4fc; }
-      .dark-mode #bottomNav button.on::before { background: #a5b4fc; }
+      .dark-mode #bottomNav button.on { color: #9db9e0; }
+      .dark-mode #bottomNav button.on::before { background: #9db9e0; }
       .set-row {
         display: flex; width: 100%; align-items: center; justify-content: space-between;
         padding: 0.85rem 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; text-align: left;
@@ -148,10 +188,10 @@
       #quizThemeBtn { display: none; }
       .in-quiz #quizThemeBtn { display: flex; margin-left: auto; }
       .in-quiz header .hdr-title { display: none; }
-      /* Pengaturan saat ujian: kotak kecil di sisi kanan (tanpa latar gelap/blur) */
+      /* Pengaturan saat ujian: kotak kecil di sisi kiri (tanpa latar gelap/blur) */
       #settingsPanel {
-        position: fixed; right: 0.75rem; left: auto; top: calc(env(safe-area-inset-top, 0px) + 3.75rem);
-        z-index: 66; width: 11.5rem;
+        position: fixed; left: 0.75rem; top: calc(env(safe-area-inset-top, 0px) + 3.75rem);
+        z-index: 66; width: 13rem;
       }
       .in-quiz #bottomNav, .in-quiz #headerTitle, .in-quiz .full-only { display: none; }
 
@@ -165,6 +205,54 @@
       }
       #stimulusContainer.stim-full .stim-viewport { flex: 1 1 0; height: auto; min-height: 0; }
       .dark-mode #stimulusContainer.stim-full { background: #0b1220; }
+
+      /* ===== Mode tinjau soal ragu-ragu: latar kuning tipis ===== */
+      body.revisit-mode { background: #fef9c3; }
+      body.revisit-mode::before { background: #fef9c3; }
+      body.revisit-mode #quizView .bg-white { background: #fffdeb; }
+      body.revisit-mode header { background: #fffdeb; }
+      body.dark-mode.revisit-mode { background: #2a2410; }
+      body.dark-mode.revisit-mode::before { background: #2a2410; }
+      body.dark-mode.revisit-mode #quizView .bg-white, body.dark-mode.revisit-mode header { background: #342d14 !important; }
+      body, #quizView .bg-white, header { transition: background-color 0.25s; }
+
+      .kebab-btn { width: 2rem; height: 2rem; border-radius: 9999px; font-size: 1.25rem; line-height: 1; font-weight: 700; color: #64748b; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .kebab-btn:hover { background: #f1f5f9; }
+      .dark-mode .kebab-btn { color: #9aa7bb; }
+      .dark-mode .kebab-btn:hover { background: #1a2438; }
+
+      /* ===== Animasi ringan (hanya opacity & transform) ===== */
+      @keyframes viewIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes popIn { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+      #homeView:not(.hidden), #quizView:not(.hidden), #resultView:not(.hidden), #historyView:not(.hidden),
+      #materiView:not(.hidden), #manageView:not(.hidden), #settingsView:not(.hidden) { animation: viewIn 0.22s ease-out; }
+      div.fixed.inset-0:not(.hidden) { animation: fadeIn 0.18s ease-out; }
+      div.fixed.inset-0:not(.hidden) > div:first-child { animation: popIn 0.22s cubic-bezier(0.2, 0.8, 0.3, 1); }
+      #settingsPanel:not(.hidden) { animation: fadeIn 0.15s ease-out; }
+      #toast:not(.hidden) { animation: fadeIn 0.2s ease-out; }
+      .kebab-pop { animation: popIn 0.14s ease-out; transform-origin: top right; }
+      .q-in { animation: viewIn 0.2s ease-out; }
+      .hdetail:not(.hidden) { animation: fadeIn 0.2s ease-out; }
+      button:not(:disabled):active { transform: scale(0.97); }
+      button { transition: transform 0.1s ease, background-color 0.15s ease, box-shadow 0.15s ease; }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation: none !important; transition: none !important; }
+      }
+
+      /* Materi (baca & edit): tampil sebagai halaman penuh, bukan pop-up */
+      #materiReadModal, #materiEditModal { padding: 0 !important; background: #fff !important; backdrop-filter: none !important; align-items: stretch !important; justify-content: stretch !important; }
+      #materiReadModal > div, #materiEditModal > div { max-width: none !important; width: 100% !important; height: 100% !important; max-height: none !important; border-radius: 0 !important; box-shadow: none !important; }
+      #materiReadModal > div > div:first-child, #materiEditModal > div > div:first-child { padding-top: calc(1rem + env(safe-area-inset-top, 0px)); padding-inline: max(1rem, calc((100% - 48rem) / 2)); }
+      #materiReadModal > div > div:last-child, #materiEditModal > div > div:last-child { padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); padding-inline: max(1rem, calc((100% - 48rem) / 2)); }
+      #materiReadBody, #materiEditModal > div > div:nth-child(2) { padding-inline: max(1.5rem, calc((100% - 48rem) / 2)) !important; }
+      #materiReadBody, #materiEditModal > div > div:nth-child(2) { flex: 1 1 auto; min-height: 0; }
+      .dark-mode #materiReadModal, .dark-mode #materiEditModal { background: #0b1220 !important; }
+
+      /* Panel nomor soal */
+      #qNavStrip button { min-height: 0 !important; }
+      .qn-cur { outline: 2px solid #1e3a5f; outline-offset: 2px; }
+      .dark-mode .qn-cur { outline-color: #9db9e0; }
 
       details > summary { list-style: none; }
       details > summary::-webkit-details-marker { display: none; }
@@ -184,90 +272,111 @@
               <h1 class="font-extrabold text-xl tracking-widest text-indigo-600">BELAJAR</h1>
             </div>
           </div>
-          <button id="quizThemeBtn" onclick="openSettings()" aria-label="Pengaturan tema"
-            class="w-9 h-9 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200">⚙️</button>
+          <button id="quizThemeBtn" onclick="openSettings()" aria-label="Pengaturan"
+            class="w-9 h-9 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-xl font-bold leading-none text-slate-600">⋮</button>
         </div>
       </header>
 
       <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col">
         <div id="homeView">
           <!-- >>> BISA DIGANTI: judul dan kalimat pengantar halaman beranda -->
-          <div class="mb-6">
-            <h2 class="text-2xl font-bold mb-1">Folder Mata Pelajaran</h2>
+          <div class="mb-5">
+            <p id="homeDate" class="text-[11px] uppercase tracking-wider text-slate-400 font-medium"></p>
+            <h2 id="homeGreeting" class="text-2xl font-bold mt-0.5 mb-1">Mata Pelajaran</h2>
             <p class="text-slate-600 text-sm">Pilih pelajaran untuk mulai memilih dan mengerjakan soal.</p>
           </div>
+          <div id="homeStats" class="grid grid-cols-3 gap-3 mb-7"></div>
+          <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Mata Pelajaran</h3>
           <!-- >>> BISA DIGANTI: kartu mata pelajaran di beranda (ikon emoji dan nama). Nama pelajaran juga muncul di: pilihan "Target Folder" (id targetSubject), filter Riwayat (id historyFilter), pilihan Prompt AI (id aiSubject), dan SUBJECT_NAME di script -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition cursor-pointer" onclick="openSubject('indo')">
-              <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-2xl mb-4">📘</div>
-              <h3 class="text-xl font-bold mb-1">Bahasa Indonesia</h3>
-              <span class="text-xs text-slate-400"><span id="indoCount">0</span> Paket Tersedia</span>
+              <div class="flex items-start justify-between"><h3 class="text-xl font-bold mb-1">Bahasa Indonesia</h3><span class="text-slate-300 text-lg leading-none">→</span></div>
+              <span class="text-xs text-slate-400"><span id="indoCount">0</span> paket · <span id="indoQ">0</span> soal</span>
+              <div id="indoMeta" class="mt-4"></div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition cursor-pointer" onclick="openSubject('mtk')">
-              <div class="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center text-2xl mb-4">🧮</div>
-              <h3 class="text-xl font-bold mb-1">Matematika</h3>
-              <span class="text-xs text-slate-400"><span id="mtkCount">0</span> Paket Tersedia</span>
+              <div class="flex items-start justify-between"><h3 class="text-xl font-bold mb-1">Matematika</h3><span class="text-slate-300 text-lg leading-none">→</span></div>
+              <span class="text-xs text-slate-400"><span id="mtkCount">0</span> paket · <span id="mtkQ">0</span> soal</span>
+              <div id="mtkMeta" class="mt-4"></div>
             </div>
           </div>
+          <div id="homeRecent" class="mt-8"></div>
         </div>
 
         <!-- Modal pilih paket + waktu pengerjaan (muncul saat folder mata pelajaran ditekan) -->
         <div id="quizOptionsView" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[55] hidden flex items-center justify-center p-4"
           onclick="if(event.target===this)goHome()">
-          <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="p-4 border-b border-slate-200 flex justify-between items-center">
-              <h3 class="font-bold text-base" id="selectedSubjectTitle">Paket Soal</h3>
-              <button onclick="goHome()" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Tutup">✕</button>
+          <div class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-6 pt-5 pb-3 flex items-center justify-between gap-3">
+              <h3 class="font-bold text-lg leading-tight" id="selectedSubjectTitle">Paket Soal</h3>
+              <button onclick="goHome()" class="w-8 h-8 -mr-2 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Tutup">✕</button>
             </div>
-            <div class="p-6 overflow-y-auto space-y-5 text-xs custom-scroll">
-              <div>
-                <label class="block font-medium mb-1">Pilih Paket Soal:</label>
-                <select id="packageSelect" onchange="onPackageChange()" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm"></select>
-                <p id="packageEmpty" class="hidden text-slate-400 italic text-center py-4">Belum ada paket. Tambahkan lewat menu Kelola Soal.</p>
-                <p id="packageInfo" class="text-slate-400 mt-1.5"></p>
+            <div class="px-4 pb-4 overflow-y-auto space-y-2 custom-scroll">
+              <!-- Pilih soal -->
+              <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <button type="button" onclick="toggleOptSection('pkg')" class="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 transition">
+                  <span class="min-w-0"><span class="block text-[11px] text-slate-400">Pilih Soal</span><span id="pkgValue" class="block text-sm font-semibold truncate">Belum dipilih</span></span>
+                  <span id="pkgChevron" class="text-slate-400 transition-transform">›</span>
+                </button>
+                <div id="pkgPanel" class="hidden px-2 pb-2">
+                  <select id="packageSelect" onchange="onPackageChange()" class="hidden" aria-hidden="true" tabindex="-1"></select>
+                  <div id="packageList" class="space-y-1 max-h-48 overflow-y-auto custom-scroll" role="radiogroup" aria-label="Paket soal"></div>
+                  <p id="packageEmpty" class="hidden text-xs text-slate-400 text-center py-5">Belum ada paket. Tambahkan lewat menu Kelola Soal.</p>
+                  <p id="packageInfo" class="hidden"></p>
+                </div>
               </div>
-              <div id="packageActions" class="space-y-5">
-                <div>
-                  <label class="block font-medium mb-1">Waktu Pengerjaan:</label>
+              <!-- Atur waktu -->
+              <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <button type="button" onclick="toggleOptSection('time')" class="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 transition">
+                  <span class="min-w-0"><span class="block text-[11px] text-slate-400">Atur Waktu</span><span id="timeValue" class="block text-sm font-semibold truncate">1 Jam</span></span>
+                  <span id="timeChevron" class="text-slate-400 transition-transform">›</span>
+                </button>
+                <div id="timePanel" class="hidden px-3 pb-3 space-y-2">
                   <!-- >>> BISA DIGANTI: pilihan durasi ujian (value = menit, 0 = tanpa batas waktu) -->
-                  <select id="durationSelect" onchange="toggleCustomDuration()" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm">
+                  <select id="durationSelect" onchange="toggleCustomDuration()" class="hidden" aria-hidden="true" tabindex="-1">
                     <option value="60">1 Jam (60 Menit)</option>
                     <option value="120">2 Jam (120 Menit)</option>
                     <option value="custom">Waktu Custom...</option>
                     <option value="0">Tanpa Batas Waktu</option>
                   </select>
-                  <div id="customDurationBox" class="hidden mt-2 flex items-center gap-2">
-                    <input type="number" id="customDuration" min="1" max="600" step="1" placeholder="Jumlah menit" class="w-40 p-2 border border-slate-300 rounded-lg text-sm" />
-                    <span class="text-slate-500">menit (1–600)</span>
+                  <div id="durationChips" class="flex gap-1 p-1 bg-slate-100 rounded-xl" role="radiogroup" aria-label="Waktu pengerjaan">
+                    <button type="button" data-v="60" onclick="setDuration('60')">1 Jam</button>
+                    <button type="button" data-v="120" onclick="setDuration('120')">2 Jam</button>
+                    <button type="button" data-v="custom" onclick="setDuration('custom')">Custom</button>
+                    <button type="button" data-v="0" onclick="setDuration('0')" title="Tanpa batas waktu">Santai</button>
                   </div>
-                  <p class="text-[11px] text-slate-400 mt-1">Pengingat muncul saat sisa 15, 5, dan 1 menit (hanya jika durasi lebih panjang dari itu).</p>
-                </div>
-                <label id="shuffleRow" class="hidden flex items-start gap-2 cursor-pointer">
-                  <input type="checkbox" id="shuffleChk" checked class="mt-0.5" />
-                  <span>Acak urutan jenis soal dalam tiap stimulus
-                    <span class="block text-[11px] text-slate-400">Soal tetap berada di stimulus yang sama, hanya urutannya yang diacak.</span></span>
-                </label>
-                <div class="flex gap-2">
-                  <button onclick="startQuiz()" class="flex-grow py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow transition">Mulai Kerjakan</button>
-                  <button id="deletePkgBtn" onclick="deleteSelectedPackage()" class="hidden px-4 bg-slate-100 hover:bg-slate-200 text-rose-600 rounded-lg" aria-label="Hapus paket" title="Hapus paket">🗑</button>
+                  <div id="customDurationBox" class="hidden flex items-center gap-2">
+                    <input type="number" id="customDuration" min="1" max="600" step="1" placeholder="Menit" oninput="paintOptValues()" class="w-28 p-2.5 border border-slate-300 rounded-lg text-sm" />
+                    <span class="text-xs text-slate-500">menit (1–600)</span>
+                  </div>
                 </div>
               </div>
+              <label id="shuffleRow" class="flex items-center justify-between gap-4 cursor-pointer px-4 py-3 border border-slate-200 rounded-xl">
+                <span class="text-sm text-slate-700">Acak urutan soal</span>
+                <input type="checkbox" id="shuffleChk" class="sw sr-only" />
+                <span class="sw-track" aria-hidden="true"></span>
+              </label>
+            </div>
+            <div class="px-6 pb-5 pt-1 flex gap-2">
+              <button id="startBtn" onclick="startQuiz()" class="flex-grow py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition">Mulai Kerjakan</button>
+              <button id="deletePkgBtn" onclick="kebab(event, deleteSelectedPackage)" class="kebab-btn hidden !w-11 !h-auto bg-slate-100 rounded-xl" aria-label="Opsi paket" title="Opsi">⋮</button>
             </div>
           </div>
         </div>
 
         <div id="quizView" class="hidden flex-grow flex flex-col space-y-4">
-          <div class="bg-white border border-slate-200 rounded-xl px-6 py-3 flex items-center justify-between shadow-sm flex-wrap gap-2">
-            <div class="flex items-center space-x-4">
+          <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl px-6 py-3 flex items-center justify-between shadow-sm flex-wrap gap-2">
+            <div class="flex items-center space-x-3">
               <span class="font-bold text-indigo-600 text-sm" id="questionNumberIndicator">Soal 1</span>
-              <select id="jumpQuestionSelect" onchange="jumpToQuestion(this.value)" class="p-1 border border-slate-300 rounded text-xs bg-white"></select>
+              <button type="button" onclick="openQNav()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg" aria-label="Daftar soal">▦ Daftar</button>
             </div>
             <div class="flex items-center space-x-3">
-              <span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded hidden" id="raguTag">🚩 Ragu-Ragu</span>
+              <span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded hidden" id="raguTag">Ragu-Ragu</span>
               <span class="text-sm font-mono bg-slate-100 px-3 py-1 rounded-lg font-bold" id="timerDisplay">60:00</span>
             </div>
+            <div class="absolute left-0 right-0 bottom-0 h-0.5 bg-slate-100"><div id="progressBar" class="h-full bg-indigo-600 transition-all" style="width:0%"></div></div>
           </div>
-          <div class="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[450px]">
+          <div id="qGrid" class="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[450px]">
             <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
               <h3 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3" id="stimulusTitle">Stimulus / Teks Bacaan</h3>
               <div id="stimulusContainer" class="flex-grow text-slate-700 text-sm leading-relaxed overflow-y-auto custom-scroll pr-2" style="max-height: 60vh"></div>
@@ -280,7 +389,7 @@
               </div>
               <div class="flex items-center justify-between pt-6 border-t border-slate-100 mt-6 flex-wrap gap-2">
                 <button onclick="toggleRagu()" id="raguBtn" class="px-3.5 py-2 bg-amber-50 text-amber-700 border border-amber-300 font-medium text-xs rounded-lg hover:bg-amber-100 transition">
-                  🚩 <span>Tandai Ragu</span>
+                  <span>Tandai Ragu</span>
                 </button>
                 <div class="flex space-x-2">
                   <button onclick="prevQuestion()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg">Sebelumnya</button>
@@ -307,13 +416,16 @@
               <div><span class="font-bold text-slate-500 text-base" id="blankCount">0</span><br />Kosong</div>
               <div><span class="font-bold text-amber-600 text-base" id="raguCount">0</span><br />Ragu</div>
             </div>
-            <div class="mt-6 flex justify-center gap-2">
+            <div class="mt-6 flex flex-wrap justify-center gap-2">
+              <button id="retryBtn" onclick="retryWrong()" class="hidden px-6 py-2 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700"></button>
               <button onclick="goHome()" class="px-6 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">Kembali ke Menu Utama</button>
               <button onclick="openHistory()" class="px-6 py-2 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg hover:bg-slate-200">Lihat Riwayat</button>
             </div>
             <p class="text-[11px] text-slate-400 mt-3">Hasil ini otomatis tersimpan di Riwayat.</p>
           </div>
+          <div id="reviewFilter" class="flex flex-wrap gap-2 text-xs" role="group" aria-label="Saring pembahasan"></div>
           <div id="reviewList" class="space-y-3 text-xs"></div>
+          <p id="reviewEmpty" class="hidden text-center text-xs text-slate-400 italic bg-white border border-slate-200 rounded-xl p-6">Tidak ada soal untuk filter ini.</p>
         </div>
 
         <div id="materiView" class="hidden max-w-3xl mx-auto w-full space-y-4"></div>
@@ -324,70 +436,88 @@
               <button onclick="openManageHelp()" class="w-8 h-8 rounded-full border border-slate-300 text-slate-500 hover:bg-slate-100 text-sm font-bold" aria-label="Cara mengisi" title="Cara mengisi">?</button>
             </div>
             <div>
-              <label class="block font-medium mb-1">Folder Mata Pelajaran:</label>
+              <label class="block font-medium mb-1">Mata Pelajaran</label>
               <select id="targetSubject" onchange="onTargetChange()" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm">
                 <option value="indo">Bahasa Indonesia</option>
                 <option value="mtk">Matematika</option>
               </select>
             </div>
-            <section class="bg-white border border-slate-200 rounded-xl p-5 space-y-4 shadow-sm">
-              <h3 class="font-bold text-sm">Tambah Paket Baru</h3>
-              <input type="text" id="packageNameInput" maxlength="80" placeholder="Nama paket (opsional)" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm" />
-              <div class="space-y-2">
-                <label class="block font-medium">Cara menampilkan stimulus:</label>
-                <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Cara menampilkan stimulus">
-                  <button type="button" id="stimModeTeks" onclick="setStimMode('teks')" role="radio">
-                    <span class="block font-semibold text-sm">📝 Teks</span>
-                    <span class="block text-[11px] text-slate-500 mt-0.5">File diubah menjadi teks. Soal hanya berupa teks.</span>
-                  </button>
-                  <button type="button" id="stimModeFile" onclick="setStimMode('file')" role="radio">
-                    <span class="block font-semibold text-sm">📄 File</span>
-                    <span class="block text-[11px] text-slate-500 mt-0.5">Terbuka seperti membuka file. 1 stimulus = 1 halaman, bisa diperbesar/diperkecil.</span>
-                  </button>
-                </div>
-                <p id="stimModeHint" class="text-[11px] text-slate-400"></p>
+            <section class="bg-white border border-slate-200 rounded-xl p-5 space-y-5 shadow-sm">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm">Tambah Paket Baru</h3>
+                <span id="mgStepLbl" class="text-[11px] text-slate-400">Langkah 1 dari 3</span>
               </div>
-              <div id="stimTextBox" class="space-y-2">
-                <label class="block font-medium">📄 File 1: Stimulus / Wacana Bacaan</label>
-                <input type="file" id="stimulusFileInput" accept=".pdf,.txt,application/pdf,text/plain" onchange="handleStimulusUpload(event)"
-                  class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700" />
-                <p id="stimulusFileStatus" class="text-slate-400 empty:hidden"></p>
-                <details class="text-slate-500">
-                  <summary class="cursor-pointer py-1">🖼 Gambar untuk stimulus (opsional)</summary>
-                  <div class="pt-2 space-y-2">
-                    <input type="file" id="stimulusImagesInput" accept="image/*" multiple onchange="handleStimulusImages(event)"
-                      class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700" />
-                    <div id="stimulusImagePreview" class="flex flex-wrap gap-2"><span class="text-slate-400">Belum ada gambar.</span></div>
+              <ol id="mgSteps" class="flex items-center gap-2" aria-label="Langkah menambah paket">
+                <li class="flex items-center gap-2 shrink-0" data-s="1"><span class="mg-dot w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center">1</span><span class="font-medium">Info</span></li>
+                <li class="flex-1 h-px bg-slate-200" aria-hidden="true"></li>
+                <li class="flex items-center gap-2 shrink-0" data-s="2"><span class="mg-dot w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center">2</span><span class="font-medium">File</span></li>
+                <li class="flex-1 h-px bg-slate-200" aria-hidden="true"></li>
+                <li class="flex items-center gap-2 shrink-0" data-s="3"><span class="mg-dot w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center">3</span><span class="font-medium">Proses</span></li>
+              </ol>
+
+              <!-- Langkah 1: info paket -->
+              <div id="mgStep1" class="space-y-4">
+                <input type="text" id="packageNameInput" maxlength="80" placeholder="Nama paket (opsional)" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm" />
+                <div class="space-y-2">
+                  <label class="block font-medium">Cara menampilkan stimulus:</label>
+                  <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Cara menampilkan stimulus">
+                    <button type="button" id="stimModeTeks" onclick="setStimMode('teks')" role="radio">
+                      <span class="block font-semibold text-sm">Teks</span>
+                      <span class="block text-[11px] text-slate-500 mt-0.5">File diubah menjadi teks. Soal hanya berupa teks.</span>
+                    </button>
+                    <button type="button" id="stimModeFile" onclick="setStimMode('file')" role="radio">
+                      <span class="block font-semibold text-sm">File</span>
+                      <span class="block text-[11px] text-slate-500 mt-0.5">Terbuka seperti membuka file. 1 stimulus = 1 halaman, bisa diperbesar/diperkecil.</span>
+                    </button>
                   </div>
-                </details>
-              </div>
-              <div id="stimFileBox" class="hidden space-y-2">
-                <label class="block font-medium">📄 File 1: File Stimulus (PDF atau gambar)</label>
-                <input type="file" id="stimFileInput" accept=".pdf,application/pdf,image/*" multiple onchange="handleStimFiles(event)"
-                  class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700" />
-                <div id="stimFileList" class="space-y-1"></div>
-                <p id="stimFileStatus" class="text-slate-400 empty:hidden"></p>
-              </div>
-              <div class="space-y-2">
-                <label class="block font-medium">📝 File 2: Daftar Pertanyaan</label>
-                <input type="file" id="soalFileInput" accept=".pdf,.txt,application/pdf,text/plain" onchange="handleSoalUpload(event)"
-                  class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-700" />
-                <p id="soalFileStatus" class="text-slate-400 empty:hidden"></p>
-              </div>
-              <div id="rawEditBox" class="hidden space-y-3 border border-slate-200 rounded-lg p-3 bg-slate-50">
-                <p class="text-[11px] text-slate-400">Perbaiki teks hasil baca file sebelum diproses. Teks juga boleh ditempel langsung tanpa memilih file.</p>
-                <div id="rawStimWrap">
-                  <label class="block font-medium mb-1">Teks stimulus</label>
-                  <textarea id="stimulusTextInput" rows="8" placeholder="### Stimulus 1&#10;Teks wacana..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono"></textarea>
-                </div>
-                <div>
-                  <label class="block font-medium mb-1">Teks soal</label>
-                  <textarea id="soalTextInput" rows="10" placeholder="1. Pertanyaan&#10;A. opsi&#10;B. opsi&#10;Kunci: A&#10;Pembahasan: ..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono"></textarea>
+                  <p id="stimModeHint" class="text-[11px] text-slate-400"></p>
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" id="rawEditBtn" onclick="toggleRawEdit()" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">✏️ Ubah Soal</button>
-                <button type="button" onclick="saveDualFileQuestions()" class="py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Proses Soal</button>
+
+              <!-- Langkah 2: file -->
+              <div id="mgStep2" class="hidden space-y-4">
+                <div id="stimTextBox" class="space-y-2">
+                  <label class="block font-medium">File 1: Stimulus / Wacana Bacaan</label>
+                  <input type="file" id="stimulusFileInput" accept=".pdf,.txt,application/pdf,text/plain" onchange="handleStimulusUpload(event)"
+                    class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700" />
+                  <p id="stimulusFileStatus" class="text-slate-400 empty:hidden"></p>
+                </div>
+                <div id="stimFileBox" class="hidden space-y-2">
+                  <label class="block font-medium">File 1: File Stimulus (PDF atau gambar)</label>
+                  <input type="file" id="stimFileInput" accept=".pdf,application/pdf,image/*" multiple onchange="handleStimFiles(event)"
+                    class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700" />
+                  <div id="stimFileList" class="space-y-1"></div>
+                  <p id="stimFileStatus" class="text-slate-400 empty:hidden"></p>
+                </div>
+                <div class="space-y-2">
+                  <label class="block font-medium">File 2: Daftar Pertanyaan</label>
+                  <input type="file" id="soalFileInput" accept=".pdf,.txt,application/pdf,text/plain" onchange="handleSoalUpload(event)"
+                    class="block w-full text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-700" />
+                  <p id="soalFileStatus" class="text-slate-400 empty:hidden"></p>
+                </div>
+              </div>
+
+              <!-- Langkah 3: periksa & proses -->
+              <div id="mgStep3" class="hidden space-y-4">
+                <div id="mgSummary" class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1"></div>
+                <button type="button" id="rawEditBtn" onclick="toggleRawEdit()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">Ubah Soal</button>
+                <div id="rawEditBox" class="hidden space-y-3 border border-slate-200 rounded-lg p-3 bg-slate-50">
+                  <p class="text-[11px] text-slate-400">Perbaiki teks hasil baca file sebelum diproses. Teks juga boleh ditempel langsung tanpa memilih file.</p>
+                  <div id="rawStimWrap">
+                    <label class="block font-medium mb-1">Teks stimulus</label>
+                    <textarea id="stimulusTextInput" rows="8" placeholder="### Stimulus 1&#10;Teks wacana..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono" oninput="renderMgSummary()"></textarea>
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Teks soal</label>
+                    <textarea id="soalTextInput" rows="10" placeholder="1. Pertanyaan&#10;A. opsi&#10;B. opsi&#10;Kunci: A&#10;Pembahasan: ..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono" oninput="renderMgSummary()"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-2 pt-1">
+                <button type="button" id="mgBackBtn" onclick="mgStepGo(-1)" class="hidden px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition">← Kembali</button>
+                <button type="button" id="mgNextBtn" onclick="mgStepGo(1)" class="flex-grow py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Lanjut →</button>
+                <button type="button" id="mgSaveBtn" onclick="saveDualFileQuestions()" class="hidden flex-grow py-2.5 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition">Proses Soal</button>
               </div>
             </section>
             <section class="space-y-2">
@@ -401,9 +531,18 @@
         <div id="settingsView" class="hidden max-w-2xl mx-auto w-full space-y-4">
           <h2 class="text-xl font-bold">Pengaturan</h2>
           <div class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
-            <button class="set-row" onclick="toggleDarkMode()"><span>🌗 Tema</span><span class="theme-label text-xs text-slate-400">Terang</span></button>
-            <button class="set-row" onclick="openAi()"><span>🤖 Buat Prompt AI</span><span class="text-slate-400">›</span></button>
-            <button class="set-row" onclick="openBackup()"><span>💾 Cadangan Data</span><span class="text-slate-400">›</span></button>
+            <button class="set-row" onclick="toggleDarkMode()"><span>Tema</span><span class="theme-label text-xs text-slate-400">Terang</span></button>
+            <div class="px-4 py-3">
+              <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium">Ukuran Teks</span><span class="fs-label text-xs text-slate-400">Normal</span></div>
+              <div class="fs-seg flex gap-1 bg-slate-100 rounded-xl p-1" role="radiogroup" aria-label="Ukuran teks">
+                <button type="button" data-fs="0" onclick="setFontScale(0)">Kecil</button>
+                <button type="button" data-fs="1" onclick="setFontScale(1)">Normal</button>
+                <button type="button" data-fs="2" onclick="setFontScale(2)">Besar</button>
+                <button type="button" data-fs="3" onclick="setFontScale(3)">Sangat Besar</button>
+              </div>
+            </div>
+            <button class="set-row" onclick="openAi()"><span>Buat Prompt AI</span><span class="text-slate-400">›</span></button>
+            <button class="set-row" onclick="openBackup()"><span>Cadangan Data</span><span class="text-slate-400">›</span></button>
           </div>
         </div>
         <div id="historyView" class="hidden max-w-2xl mx-auto w-full space-y-4">
@@ -433,6 +572,24 @@
       </main>
     </div>
 
+    <div id="qNavModal" class="fixed inset-0 bg-slate-900/50 z-[70] hidden flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) closeQNav()">
+      <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl p-5 space-y-4 max-h-[80vh] overflow-y-auto custom-scroll">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-sm">Daftar Soal</h3>
+            <p id="progressLbl" class="text-[11px] text-slate-400">0/0 terjawab</p>
+          </div>
+          <button type="button" onclick="closeQNav()" class="w-8 h-8 rounded-full text-slate-400 hover:bg-slate-100" aria-label="Tutup">✕</button>
+        </div>
+        <div id="qNavStrip" class="grid grid-cols-6 sm:grid-cols-7 gap-2" role="group" aria-label="Nomor soal"></div>
+        <div class="flex items-center gap-4 text-[11px] text-slate-500">
+          <span class="flex items-center gap-1"><i class="inline-block w-2.5 h-2.5 rounded-sm bg-white border border-slate-300"></i>Kosong</span>
+          <span class="flex items-center gap-1"><i class="inline-block w-2.5 h-2.5 rounded-sm bg-indigo-600"></i>Terjawab</span>
+          <span class="flex items-center gap-1"><i class="inline-block w-2.5 h-2.5 rounded-sm bg-amber-400"></i>Ragu</span>
+        </div>
+      </div>
+    </div>
+
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center hidden p-4">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 space-y-4">
         <p id="confirmMsg" class="text-sm text-slate-700"></p>
@@ -443,9 +600,35 @@
       </div>
     </div>
 
-    <!-- Pengaturan saat ujian: kotak kecil di kanan (hanya Tema) -->
+    <!-- Pengaturan saat ujian: kotak kecil di kiri (hanya Tema) -->
     <div id="settingsPanel" class="hidden bg-white border border-slate-200 rounded-xl shadow-lg p-1.5">
-      <button class="set-row !py-2.5" onclick="toggleDarkMode()"><span>🌗 Tema</span><span class="theme-label text-xs text-slate-400">Terang</span></button>
+      <button class="set-row !py-2.5" onclick="toggleDarkMode()"><span>Tema</span><span class="theme-label text-xs text-slate-400">Terang</span></button>
+      <div class="px-3 pt-1.5 pb-2">
+        <div class="text-xs font-medium mb-1.5">Ukuran Teks</div>
+        <div class="fs-step flex items-center justify-between gap-1">
+          <button type="button" id="fsDown" onclick="stepFontScale(-1)" aria-label="Perkecil teks">A−</button>
+          <span class="fs-label text-xs text-slate-500 text-center flex-1">Normal</span>
+          <button type="button" id="fsUp" onclick="stepFontScale(1)" aria-label="Perbesar teks">A+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Peringatan soal kosong saat menyelesaikan ujian -->
+    <div id="blankModal" class="fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center hidden p-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-sm font-bold flex items-center justify-center shrink-0">!</span>
+          <div class="space-y-1">
+            <p class="font-bold text-sm text-slate-800" id="blankTitle"></p>
+            <p class="text-xs text-slate-500">Soal yang belum dijawab (ketuk nomor untuk membukanya):</p>
+          </div>
+        </div>
+        <div id="blankChips" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto custom-scroll"></div>
+        <div class="flex flex-col gap-2">
+          <button id="blankWork" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg">Kerjakan Soal Kosong</button>
+          <button id="blankFinish" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-rose-600 text-xs font-semibold rounded-lg">Tetap Selesaikan Ujian</button>
+        </div>
+      </div>
     </div>
 
     <!-- >>> BISA DIGANTI: kalimat pengantar jendela Prompt AI (isi prompt-nya ada di fungsi buildAiPrompt di script) -->
@@ -479,11 +662,22 @@
     </div>
     <div id="folderModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[66] flex items-center justify-center hidden p-4">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-5 space-y-3">
-        <h3 class="font-bold text-base">Folder Baru</h3>
+        <h3 id="folderModalTitle" class="font-bold text-base">Folder Baru</h3>
         <input id="folderNameInput" maxlength="40" placeholder="Nama folder" onkeydown="if (event.key === 'Enter') saveFolder();" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm" />
         <div class="flex justify-end gap-2">
           <button onclick="closeFolderModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg">Batal</button>
-          <button onclick="saveFolder()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">Buat</button>
+          <button id="folderSaveBtn" onclick="saveFolder()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">Buat</button>
+        </div>
+      </div>
+    </div>
+    <div id="materiAddModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] flex items-center justify-center hidden p-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-5 space-y-3">
+        <h3 class="font-bold text-base">Tambah Teks</h3>
+        <p id="materiAddInfo" class="text-[11px] text-slate-400 break-words"></p>
+        <textarea id="materiAddInput" rows="8" placeholder="Tulis catatan atau penjelasan tambahan...&#10;# Judul bagian&#10;- poin" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm font-mono bg-white"></textarea>
+        <div class="flex justify-end gap-2">
+          <button onclick="closeMateriAdd()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg">Batal</button>
+          <button onclick="saveMateriAdd()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">Tambahkan</button>
         </div>
       </div>
     </div>
@@ -495,8 +689,8 @@
         </div>
         <div id="materiReadBody" class="p-6 overflow-y-auto text-sm leading-relaxed text-slate-700 custom-scroll"></div>
         <div class="p-4 border-t border-slate-200 flex justify-between">
-          <button id="materiDelBtn" class="px-4 py-2 bg-rose-600 text-white text-xs font-medium rounded-lg hover:bg-rose-700">🗑 Hapus</button>
-          <button id="materiEditBtn" class="px-4 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">✏️ Edit</button>
+          <button id="materiDelBtn" class="kebab-btn" aria-label="Opsi materi" title="Opsi">⋮</button>
+          <button id="materiEditBtn" class="px-4 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700">Edit</button>
         </div>
       </div>
     </div>
@@ -514,8 +708,8 @@
           <div>
             <label class="block font-medium mb-1">Disimpan sebagai:</label>
             <div class="grid grid-cols-2 gap-2">
-              <button id="mmFile" onclick="setMateriMode('file')" class="py-2 rounded-lg font-medium">📄 File</button>
-              <button id="mmText" onclick="setMateriMode('text')" class="py-2 rounded-lg font-medium">📝 Teks</button>
+              <button id="mmFile" onclick="setMateriMode('file')" class="py-2 rounded-lg font-medium">File</button>
+              <button id="mmText" onclick="setMateriMode('text')" class="py-2 rounded-lg font-medium">Teks</button>
             </div>
             <p id="mmHint" class="text-slate-400 mt-1"></p>
           </div>
@@ -588,7 +782,7 @@
           <div class="space-y-2">
             <h4 class="font-bold text-slate-800 text-sm">Simpan cadangan</h4>
             <p>Menghasilkan satu file <code>.json</code> berisi semua data.</p>
-            <button onclick="exportBackup()" id="backupExportBtn" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700">⬇ Unduh Cadangan</button>
+            <button onclick="exportBackup()" id="backupExportBtn" class="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700">Unduh Cadangan</button>
           </div>
           <div class="space-y-2">
             <h4 class="font-bold text-slate-800 text-sm">Pulihkan cadangan</h4>
@@ -684,7 +878,72 @@ Pembahasan: penjelasan singkat</pre>
     </div>
 
     <script>
-      // ===== Pengaturan pola soal: ubah di sini =====
+      // =====================================================================
+      // PETA KODE (urutan bagian di file ini)
+      //   1. Konfigurasi umum ........ KEYS, VIEW_IDS, MODAL_IDS, store, hideViews
+      //   2. Pola soal & data contoh .. PER_STIMULUS, INDO_PATTERN, DEFAULT_DATA
+      //   3. Navigasi & pengaturan .... NAV (taskbar), menu titik tiga, ukuran teks, mode gelap
+      //   4. Data soal & beranda ...... getUnits, renderHome, pilih paket/waktu
+      //   5. Ujian .................... startQuiz, renderQuestion, finishQuiz
+      //   6. Impor soal ............... baca PDF/TXT, parsing soal
+      //   7. Kelola Soal .............. langkah tambah paket, editor paket, prompt AI
+      //   8. Riwayat .................. grafik & detail hasil
+      //   9. Materi ................... folder, baca, tambah teks, editor
+      //  10. Cadangan data ............ ekspor / impor
+      //
+      // CARA MENAMBAH FITUR
+      //   - Item baru di menu ⋮ materi ........ tambah satu baris di materiMenuItems()
+      //   - Item baru di menu ⋮ folder ........ tambah satu baris di folderMenuItems()
+      //   - Tab baru di taskbar bawah ......... tambah satu baris di NAV
+      //   - Halaman (view) baru ............... daftarkan id-nya di VIEW_IDS, buka dengan hideViews("idBaru")
+      //   - Pop-up (modal) baru ............... daftarkan id-nya di MODAL_IDS agar tertutup oleh tombol kembali
+      //   - Data baru di penyimpanan browser .. tambah kunci di KEYS, pakai store.get / store.set,
+      //                                         dan masukkan ke BACKUP_KEYS bila perlu ikut cadangan
+      // =====================================================================
+
+      // ===== 1. Konfigurasi umum =====
+      // Semua kunci localStorage ada di sini. Jangan ubah nilainya: data pengguna tersimpan dengan kunci ini.
+      const KEYS = {
+        questions: "tka_master_questions_v2",
+        images: "tka_master_images_v1",
+        stimFiles: "tka_master_stimfiles_v1",
+        history: "tka_master_history",
+        materi: "tka_master_materi_v2",
+        materiOld: "tka_master_materi_v1", // format lama, hanya dibaca untuk migrasi
+        fontScale: "tka_font_scale",
+        session: "tka_exam_session_v1",
+      };
+      // Semua halaman utama. hideViews("x") menyembunyikan semuanya kecuali "x".
+      const VIEW_IDS = ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "materiView", "manageView", "settingsView"];
+      const hideViews = (...keep) => VIEW_IDS.filter((id) => !keep.includes(id)).forEach((id) => $(id).classList.add("hidden"));
+      // Pop-up yang ikut tertutup saat tombol kembali browser ditekan.
+      const MODAL_IDS = [
+        "settingsPanel", "manageHelpModal", "materiReadModal", "materiEditModal",
+        "materiHelpModal", "folderModal", "aiModal", "backupModal", "materiAddModal",
+      ];
+      const closeAllModals = () => MODAL_IDS.forEach((id) => $(id).classList.add("hidden"));
+      // Pembungkus localStorage berformat JSON: tidak pernah melempar error.
+      const store = {
+        get(key, fallback) {
+          try {
+            const v = localStorage.getItem(key);
+            return v == null ? fallback : JSON.parse(v);
+          } catch (e) {
+            return fallback;
+          }
+        },
+        set(key, value) {
+          try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+          } catch (e) {
+            return false;
+          }
+        },
+      };
+
+      // ===== 2. Pola soal & data contoh =====
+      // (Pengaturan pola soal: ubah di sini)
       // >>> BISA DIGANTI: PER_STIMULUS = jumlah soal per stimulus Bahasa Indonesia, MTK_PER_STIMULUS = untuk Matematika
       // >>> BISA DIGANTI: INDO_PATTERN = urutan jenis soal tiap stimulus Bahasa Indonesia. Pilihan jenis: pg, pgk, bs, kat (jumlah isinya harus sama dengan PER_STIMULUS)
       const PER_STIMULUS = 5;
@@ -797,17 +1056,23 @@ Pembahasan: penjelasan singkat</pre>
           ? (v || []).map((c, i) => String.fromCharCode(65 + i) + ": " + (c == null || c < 0 ? "-" : (q.cats || [])[c])).join(" | ")
           : (Array.isArray(v) ? v : [v]).map((i) => q.options[i]).filter(Boolean).join(" | ");
       // Rumus: render LaTeX ($...$) memakai MathJax, berurutan agar tidak bentrok.
+      const mjPending = new Set();
+      // ===== 3. Rumus matematika & tampilan teks =====
       function typeset(el) {
-        if (!window.MathJax || !MathJax.typesetPromise || !el) return;
+        if (!el) return;
+        // MathJax belum siap: simpan dulu, diproses begitu siap
+        if (!window.MathJax || !MathJax.typesetPromise) { mjPending.add(el); return; }
         mjq = mjq
           .then(() => {
             if (MathJax.typesetClear) MathJax.typesetClear([el]);
-            return MathJax.typesetPromise([el]);
+            return Promise.race([MathJax.typesetPromise([el]), new Promise((r) => setTimeout(r, 5000))]);
           })
           .catch(() => {});
       }
       function afterMathReady() {
         ["quizView", "reviewList", "materiReadBody", "detailContent"].forEach((id) => typeset($(id)));
+        mjPending.forEach((el) => typeset(el));
+        mjPending.clear();
       }
 
       // Menyambung baris yang terpotong (mis. dari PDF) menjadi paragraf utuh.
@@ -848,7 +1113,7 @@ Pembahasan: penjelasan singkat</pre>
         return paras;
       }
 
-      // ===== Taskbar bawah =====
+      // ===== 3. Navigasi & pengaturan: taskbar bawah =====
       // Urutan kiri ke kanan: Home, Materi, Kelola Soal, Riwayat, Pengaturan
       const NAV = [
         ["beranda", "Home", "goHomeSafe()", "M3 11.5 12 4l9 7.5M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"],
@@ -866,13 +1131,13 @@ Pembahasan: penjelasan singkat</pre>
       function openSettings() {
         syncThemeLabel();
         if (inQuizNow()) {
-          // Mode ujian: kotak kecil di kanan, ujian tidak terganggu
+          // Mode ujian: kotak kecil di kiri, ujian tidak terganggu
           $("settingsPanel").classList.toggle("hidden");
           return;
         }
         clearInterval(timerInterval);
         hideToast();
-        ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "materiView", "manageView"].forEach((id) => $(id).classList.add("hidden"));
+        hideViews("settingsView");
         $("settingsView").classList.remove("hidden");
         nav("pengaturan");
       }
@@ -883,6 +1148,57 @@ Pembahasan: penjelasan singkat</pre>
         const p = $("settingsPanel");
         if (!p.classList.contains("hidden") && !p.contains(e.target) && !e.target.closest("#quizThemeBtn")) closeSettings();
       });
+      // ===== Menu titik tiga (⋮) untuk aksi hapus =====
+      let kebabEl = null;
+      function closeKebab() {
+        if (kebabEl) { kebabEl.remove(); kebabEl = null; }
+      }
+      function kebab(ev, fn, extra) {
+        ev.stopPropagation();
+        const b = ev.currentTarget, same = kebabEl && kebabEl._btn === b;
+        closeKebab();
+        if (same) return;
+        const r = b.getBoundingClientRect(), m = document.createElement("div");
+        m.className = "kebab-pop fixed z-[95] bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[8rem]";
+        const items = (extra || []).concat([{ label: "Hapus", fn, danger: true }]);
+        items.forEach((it) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "w-full text-left px-4 py-2 text-xs font-medium " + (it.danger ? "text-rose-600 hover:bg-rose-50" : "text-slate-700 hover:bg-slate-100");
+          b.innerText = it.label;
+          b.onclick = (e) => { e.stopPropagation(); closeKebab(); it.fn(); };
+          m.appendChild(b);
+        });
+        document.body.appendChild(m);
+        const w = m.offsetWidth, h = m.offsetHeight;
+        m.style.left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8) + "px";
+        m.style.top = (r.bottom + h + 12 > window.innerHeight ? Math.max(8, r.top - h - 4) : r.bottom + 4) + "px";
+        m._btn = b;
+        kebabEl = m;
+      }
+      document.addEventListener("click", closeKebab);
+      window.addEventListener("scroll", closeKebab, true);
+      window.addEventListener("resize", closeKebab);
+
+      // ===== Ukuran teks =====
+      const FS_STEPS = [0.9, 1, 1.15, 1.3], FS_NAMES = ["Kecil", "Normal", "Besar", "Sangat Besar"];
+      let fsIdx = 1;
+      function setFontScale(i, save = true) {
+        fsIdx = Math.max(0, Math.min(FS_STEPS.length - 1, i));
+        document.documentElement.style.setProperty("--fs", FS_STEPS[fsIdx]);
+        document.querySelectorAll(".fs-label").forEach((e) => (e.innerText = FS_NAMES[fsIdx]));
+        document.querySelectorAll(".fs-seg button").forEach((b) => b.classList.toggle("on", +b.dataset.fs === fsIdx));
+        const d = $("fsDown"), u = $("fsUp");
+        if (d) d.disabled = fsIdx === 0;
+        if (u) u.disabled = fsIdx === FS_STEPS.length - 1;
+        if (save) try { localStorage.setItem(KEYS.fontScale, String(fsIdx)); } catch (e) {}
+      }
+      const stepFontScale = (d) => setFontScale(fsIdx + d);
+      function loadFontScale() {
+        let i = 1;
+        try { const v = parseInt(localStorage.getItem(KEYS.fontScale)); if (v >= 0 && v < FS_STEPS.length) i = v; } catch (e) {}
+        setFontScale(i, false);
+      }
       function toggleDarkMode() {
         document.body.classList.toggle("dark-mode");
         syncThemeLabel();
@@ -896,36 +1212,31 @@ Pembahasan: penjelasan singkat</pre>
           ).join("") +
           "</div>";
         paintNav("beranda");
+        loadFontScale();
         loadFromLocalStorage();
         loadHistory();
+        renderHome();
         loadMateri();
         loadImages();
         loadStimMeta();
         updateCounts();
         paintStimMode();
+        paintMgSteps();
         history.replaceState(null, "", "#beranda");
         $("patternText").innerText = INDO_PATTERN.map((t, i) => i + 1 + "=" + TYPE_SHORT[t]).join(", ");
         if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) toggleDarkMode();
+        offerResume();
       });
 
       function loadFromLocalStorage() {
-        try {
-          const saved = localStorage.getItem("tka_master_questions_v2");
-          if (saved) {
-            const p = JSON.parse(saved);
-            questionsData = { indo: p.indo || [], mtk: p.mtk || [] };
-          }
-        } catch (e) {}
+        const p = store.get(KEYS.questions, null);
+        if (p) questionsData = { indo: p.indo || [], mtk: p.mtk || [] };
       }
       function saveToLocalStorage() {
-        lastSaveOk = true;
-        try {
-          localStorage.setItem("tka_master_questions_v2", JSON.stringify(questionsData));
-        } catch (e) {
-          lastSaveOk = false;
-        }
+        lastSaveOk = store.set(KEYS.questions, questionsData);
         updateCounts();
       }
+      // ===== 4. Data paket, beranda & pilihan paket =====
       function getUnits(subject) {
         const map = new Map();
         (questionsData[subject] || []).forEach((q) => {
@@ -938,24 +1249,62 @@ Pembahasan: penjelasan singkat</pre>
       function updateCounts() {
         $("indoCount").innerText = getUnits("indo").length;
         $("mtkCount").innerText = getUnits("mtk").length;
+        renderHome();
+      }
+      let homeRecentOpen = false;
+      function toggleHomeRecent() {
+        homeRecentOpen = !homeRecentOpen;
+        renderHome();
+      }
+      function renderHome() {
+        if (!$("homeGreeting")) return;
+        const now = new Date(), hr = now.getHours();
+        $("homeGreeting").innerText = hr < 11 ? "Selamat pagi" : hr < 15 ? "Selamat siang" : hr < 18 ? "Selamat sore" : "Selamat malam";
+        $("homeDate").innerText = now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+        const hist = Array.isArray(examHistory) ? examHistory : [];
+        const avg = (a) => (a.length ? Math.round(a.reduce((x, y) => x + (y.score || 0), 0) / a.length) : null);
+        const dShort = (t) => new Date(t).toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+        const stat = (label, val, sub) =>
+          `<div class="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm"><div class="text-[11px] text-slate-400">${label}</div><div class="text-xl font-bold mt-0.5">${val}</div><div class="text-[10px] text-slate-400 h-3">${sub || ""}</div></div>`;
+        const all = avg(hist);
+        $("homeStats").innerHTML =
+          stat("Ujian selesai", hist.length, hist.length ? "sejak " + dShort(hist[hist.length - 1].time) : "belum ada") +
+          stat("Rata-rata nilai", all === null ? "–" : all + "%", "") +
+          stat("Nilai terakhir", hist.length ? hist[0].score + "%" : "–", hist.length ? dShort(hist[0].time) : "");
+        ["indo", "mtk"].forEach((sj) => {
+          const units = getUnits(sj);
+          $(sj + "Q").innerText = units.reduce((n, u) => n + u.questions.length, 0);
+          const hs = hist.filter((x) => x.subject === sj), a = avg(hs);
+          $(sj + "Meta").innerHTML = hs.length
+            ? `<div class="flex justify-between text-[11px] text-slate-500 mb-1"><span>Rata-rata nilai · ${hs.length} ujian</span><span class="font-semibold">${a}%</span></div><div class="h-1.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-indigo-600" style="width:${a}%"></div></div>`
+            : '<p class="text-[11px] text-slate-400">Belum ada riwayat ujian</p>';
+        });
+        const pill = (n) => (n >= 75 ? "bg-emerald-50 text-emerald-700" : n >= 50 ? "bg-amber-50 text-amber-700" : "bg-rose-50 text-rose-700");
+        $("homeRecent").innerHTML = hist.length
+          ? `<button onclick="toggleHomeRecent()" aria-expanded="${homeRecentOpen}" class="w-full flex items-center justify-between bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium hover:shadow-md transition"><span>Aktivitas Terakhir</span><span class="flex items-center gap-2 text-xs text-slate-400">${hist.length} ujian<span class="inline-block transition-transform" style="transform:rotate(${homeRecentOpen ? 90 : 0}deg)">›</span></span></button>` +
+            (homeRecentOpen
+              ? `<div class="space-y-2 mt-2">` +
+                hist.slice(0, 3).map((x) => `<div class="bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3"><div class="min-w-0"><div class="text-sm font-semibold truncate">${esc((x.packages || []).join(", ") || "Soal")}</div><div class="text-[11px] text-slate-400">${esc(SUBJECT_NAME[x.subject] || "")} · ${dShort(x.time)} · ${x.correct}/${x.total} benar</div></div><span class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-lg ${pill(x.score)}">${x.score}%</span></div>`).join("") +
+                `</div><button onclick="openHistory()" class="mt-3 text-xs text-indigo-600 font-medium">Lihat semua riwayat →</button>`
+              : "")
+          : "";
       }
       function goHome() {
         nav("beranda");
         clearInterval(timerInterval);
         hideToast();
         $("homeView").classList.remove("hidden");
-        ["quizOptionsView", "quizView", "resultView", "historyView", "materiView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
+        hideViews("homeView");
         updateCounts();
       }
       // Menekan folder mata pelajaran: muncul modal pilih paket + waktu pengerjaan
       function openSubject(subject) {
         nav("soal");
         currentSubject = subject;
-        $("selectedSubjectTitle").innerText = "Folder: " + SUBJECT_NAME[subject];
-        $("shuffleRow").classList.toggle("hidden", subject !== "mtk");
-        $("shuffleChk").checked = true;
+        $("selectedSubjectTitle").innerText = SUBJECT_NAME[subject];
+        $("shuffleChk").checked = subject === "mtk";
         renderQuestionSelectList();
-        ["quizView", "resultView", "historyView", "materiView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
+        hideViews("homeView", "quizOptionsView");
         $("homeView").classList.remove("hidden");
         $("quizOptionsView").classList.remove("hidden");
       }
@@ -964,18 +1313,67 @@ Pembahasan: penjelasan singkat</pre>
         sel.innerHTML =
           '<option value="">Pilih paket soal...</option>' +
           units.map((u, i) => `<option value="${esc(u.key)}">${i + 1}. ${esc(u.name)} (${u.questions.length} soal)</option>`).join("");
-        sel.classList.toggle("hidden", !units.length);
         $("packageEmpty").classList.toggle("hidden", units.length > 0);
-        sel.value = units.some((u) => u.key === prev) ? prev : "";
+        sel.value = units.some((u) => u.key === prev) ? prev : units.length === 1 ? units[0].key : "";
         onPackageChange();
+        paintDuration();
+        setOptOpen(null); // default tertutup, terbuka saat ditekan
+      }
+      const pkgStimCount = (u) => new Set(u.questions.map((q) => (q.stimPage ? "p" + q.stimPage : q.stimulus)).filter(Boolean)).size;
+      function renderPackageList() {
+        const units = getUnits(currentSubject);
+        $("packageList").innerHTML = units
+          .map((u) => {
+            const on = u.key === selectedPackageKey;
+            return `<button type="button" role="radio" aria-checked="${on}" data-k="${esc(u.key)}" onclick="pickPackage(this.dataset.k)" class="w-full text-left px-3.5 py-2.5 rounded-lg transition flex items-center justify-between gap-3 ${on ? "bg-indigo-50" : "hover:bg-slate-50"}">
+              <span class="text-sm truncate ${on ? "font-semibold text-indigo-600" : "font-medium text-slate-700"}">${esc(u.name)}</span>
+              <span class="shrink-0 text-xs ${on ? "text-indigo-600" : "text-slate-400"}">${u.questions.length} soal</span></button>`;
+          })
+          .join("");
+        $("startBtn").classList.toggle("opacity-50", !selectedPackageKey);
+        paintOptValues();
+      }
+      let optOpen = null;
+      function setOptOpen(k) {
+        optOpen = k;
+        ["pkg", "time"].forEach((n) => {
+          $(n + "Panel").classList.toggle("hidden", n !== k);
+          $(n + "Chevron").style.transform = n === k ? "rotate(90deg)" : "";
+        });
+      }
+      const toggleOptSection = (k) => setOptOpen(optOpen === k ? null : k);
+      function paintOptValues() {
+        const u = getUnits(currentSubject).find((x) => x.key === selectedPackageKey);
+        $("pkgValue").innerText = u ? u.name + " · " + u.questions.length + " soal" : "Belum dipilih";
+        const v = $("durationSelect").value, c = $("customDuration").value;
+        $("timeValue").innerText = v === "60" ? "1 Jam" : v === "120" ? "2 Jam" : v === "0" ? "Santai (tanpa batas waktu)" : c ? c + " menit" : "Custom";
+      }
+      function pickPackage(k) {
+        $("packageSelect").value = k;
+        onPackageChange();
+        setOptOpen(null);
+      }
+      function setDuration(v) {
+        $("durationSelect").value = v;
+        toggleCustomDuration();
+        if (v === "custom") setTimeout(() => $("customDuration").focus(), 30);
+        else setOptOpen(null);
+      }
+      function paintDuration() {
+        const v = $("durationSelect").value;
+        paintOptValues();
+        document.querySelectorAll("#durationChips button").forEach((b) => {
+          const on = b.dataset.v === v;
+          b.setAttribute("aria-checked", on);
+          b.className = "flex-1 py-2 rounded-lg text-xs font-medium transition " + (on ? "bg-white shadow-sm text-indigo-600" : "text-slate-500 hover:text-slate-700");
+        });
       }
       function onPackageChange() {
         const u = getUnits(currentSubject).find((x) => x.key === $("packageSelect").value);
         selectedPackageKey = u ? u.key : null;
         $("deletePkgBtn").classList.toggle("hidden", !u);
-        $("packageInfo").innerText = u
-          ? u.questions.length + " soal · " + new Set(u.questions.map((q) => (q.stimPage ? "p" + q.stimPage : q.stimulus)).filter(Boolean)).size + " stimulus"
-          : "";
+        $("packageInfo").innerText = u ? u.questions.length + " soal · " + pkgStimCount(u) + " stimulus" : "";
+        renderPackageList();
       }
       function deleteSelectedPackage() {
         if (selectedPackageKey) deletePackage(selectedPackageKey);
@@ -1005,6 +1403,7 @@ Pembahasan: penjelasan singkat</pre>
         }
         return a;
       };
+      // ===== 5. Ujian: mulai, pengerjaan, hasil =====
       function shuffleGroups(qs) {
         const out = [];
         let g = [], last = null;
@@ -1027,7 +1426,12 @@ Pembahasan: penjelasan singkat</pre>
           return;
         }
         currentQuestions = questionsData[currentSubject].filter((q) => ids.includes(q.packageId || q.id));
-        if (currentSubject === "mtk" && $("shuffleChk").checked) currentQuestions = shuffleGroups(currentQuestions);
+        if ($("shuffleChk").checked) currentQuestions = shuffleGroups(currentQuestions);
+        isRetry = false;
+        setupExam(duration);
+        enterExamUI();
+      }
+      function setupExam(minutes) {
         currentIndex = 0;
         userAnswers = {};
         raguState = {};
@@ -1035,20 +1439,26 @@ Pembahasan: penjelasan singkat</pre>
         pos = 0;
         startTime = Date.now();
         finished = false;
-        totalSeconds = duration * 60;
+        totalSeconds = minutes * 60;
         timeLeft = totalSeconds;
         endTime = startTime + totalSeconds * 1000;
         shownReminders = new Set();
+      }
+      function enterExamUI() {
         hideToast();
         resetStimViewer();
-        $("jumpQuestionSelect").innerHTML = currentQuestions.map((_, i) => `<option value="${i}">Loncat ke Nomor ${i + 1}</option>`).join("");
         closeSetting();
-        $("homeView").classList.add("hidden");
+        hideViews("quizOptionsView", "quizView");
         $("quizView").classList.remove("hidden");
         resultReady = false;
+        examLive = true;
         nav("ujian");
+        $("qNavStrip").innerHTML = "";
+        lastShownIdx = -1;
+        closeQNav();
         clearInterval(timerInterval);
-        if (duration > 0) {
+        if (totalSeconds > 0) {
+          timeLeft = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
           showTime();
           startTimer();
         } else {
@@ -1058,6 +1468,109 @@ Pembahasan: penjelasan singkat</pre>
         }
         renderQuestion();
       }
+
+      // ===== Panel nomor soal =====
+      function renderNavPanel() {
+        const strip = $("qNavStrip"), n = currentQuestions.length;
+        if (strip.children.length !== n) {
+          strip.innerHTML = currentQuestions
+            .map((_, i) => `<button type="button" onclick="jumpToQuestion(${i}); closeQNav()" aria-label="Soal ${i + 1}" class="qn h-10 rounded-lg border text-sm font-semibold">${i + 1}</button>`)
+            .join("");
+        }
+        let done = 0, ragu = 0;
+        [...strip.children].forEach((b, i) => {
+          const a = answered(userAnswers[i]), r = !!raguState[i];
+          if (a) done++;
+          if (r) ragu++;
+          b.className =
+            "qn h-10 rounded-lg border text-sm font-semibold " +
+            (r ? "bg-amber-400 border-amber-400 text-slate-900" : a ? "bg-indigo-600 border-indigo-600 text-white" : "bg-white border-slate-300 text-slate-600") +
+            (i === currentIndex ? " qn-cur" : "");
+        });
+        $("progressLbl").innerText = done + "/" + n + " terjawab" + (ragu ? " · " + ragu + " ragu" : "");
+        $("progressBar").style.width = (n ? Math.round((done / n) * 100) : 0) + "%";
+      }
+      function openQNav() { renderNavPanel(); $("qNavModal").classList.remove("hidden"); }
+      function closeQNav() { $("qNavModal").classList.add("hidden"); }
+
+      // ===== Simpan otomatis ujian (bisa dilanjutkan) =====
+      const SESSION_KEY = KEYS.session;
+      let examLive = false, isRetry = false, lastResult = null;
+      function saveSession() {
+        if (!examLive || finished) return;
+        try {
+          localStorage.setItem(SESSION_KEY, JSON.stringify({
+            v: 1, subject: currentSubject, qs: currentQuestions, answers: userAnswers, ragu: raguState,
+            seq, pos, idx: currentIndex, start: startTime, end: endTime, total: totalSeconds,
+            rem: [...shownReminders], retry: isRetry,
+          }));
+        } catch (e) {}
+      }
+      function clearSession() {
+        try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+      }
+      new MutationObserver(() => {
+        if ($("quizView").classList.contains("hidden")) closeQNav();
+        if ($("quizView").classList.contains("hidden") && examLive) { examLive = false; clearSession(); }
+      }).observe($("quizView"), { attributes: true, attributeFilter: ["class"] });
+      async function offerResume() {
+        let sv = null;
+        try { sv = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch (e) {}
+        if (!sv || sv.v !== 1) return;
+        if (!Array.isArray(sv.qs) || !sv.qs.length || !Array.isArray(sv.seq) || !questionsData[sv.subject]) { clearSession(); return; }
+        const expired = sv.total > 0 && Date.now() >= sv.end;
+        const done = sv.qs.filter((q, i) => answered((sv.answers || {})[i])).length;
+        const pkg = sv.qs[0].packageName || "Soal Demo";
+        const msg = expired
+          ? "Waktu ujian “" + pkg + "” sudah habis saat aplikasi ditutup. Lihat hasilnya sekarang?"
+          : "Ada ujian yang belum selesai: “" + pkg + "” (" + done + "/" + sv.qs.length + " terjawab). Lanjutkan?";
+        const no = $("confirmNo");
+        no.innerText = "Buang";
+        const ok = await askConfirm(msg, expired ? "Lihat Hasil" : "Lanjutkan");
+        no.innerText = "Batal";
+        if (!ok) { clearSession(); return; }
+        currentSubject = sv.subject;
+        currentQuestions = sv.qs;
+        userAnswers = sv.answers || {};
+        raguState = sv.ragu || {};
+        seq = sv.seq;
+        pos = Math.min(sv.pos || 0, seq.length - 1);
+        currentIndex = sv.idx || 0;
+        startTime = sv.start;
+        endTime = sv.end;
+        totalSeconds = sv.total;
+        shownReminders = new Set(sv.rem || []);
+        isRetry = !!sv.retry;
+        finished = false;
+        enterExamUI();
+        if (expired) { startTime = Date.now() - totalSeconds * 1000; finishQuiz(); }
+      }
+
+      // ===== Ulangi soal salah / kosong =====
+      function retryWrong() {
+        if (!lastResult || !lastResult.qs.length) return;
+        currentSubject = lastResult.subject;
+        currentQuestions = lastResult.qs.slice();
+        const mins = lastResult.minutes > 0 ? Math.max(1, Math.ceil((lastResult.minutes * currentQuestions.length) / lastResult.total)) : 0;
+        isRetry = true;
+        setupExam(mins);
+        enterExamUI();
+        showToast("Mengulang " + currentQuestions.length + " soal yang salah/kosong" + (mins ? " · " + mins + " menit" : ""));
+      }
+      function setReviewFilter(f) {
+        const list = $("reviewList");
+        let shown = 0;
+        [...list.children].forEach((el) => {
+          const ok = f === "all" || (f === "ragu" ? el.dataset.r === "1" : el.dataset.st === f);
+          el.classList.toggle("hidden", !ok);
+          if (ok) shown++;
+        });
+        $("reviewEmpty").classList.toggle("hidden", shown > 0);
+        document.querySelectorAll("#reviewFilter button").forEach((b) => {
+          const on = b.dataset.f === f;
+          b.className = "px-3 py-1.5 rounded-full font-medium " + (on ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200");
+        });
+      }
       function showTime() {
         const m = Math.floor(timeLeft / 60), s = timeLeft % 60, el = $("timerDisplay");
         el.innerText = `${m}:${s < 10 ? "0" : ""}${s}`;
@@ -1065,6 +1578,7 @@ Pembahasan: penjelasan singkat</pre>
       }
       function toggleCustomDuration() {
         $("customDurationBox").classList.toggle("hidden", $("durationSelect").value !== "custom");
+        paintDuration();
       }
       function showToast(msg, danger) {
         const t = $("toast");
@@ -1085,7 +1599,7 @@ Pembahasan: penjelasan singkat</pre>
         [15, 5, 1].forEach((min) => {
           if (min * 60 < totalSeconds && timeLeft <= min * 60 && timeLeft > 0 && !shownReminders.has(min)) {
             shownReminders.add(min);
-            showToast(`⏰ Sisa waktu ${min} menit!`, min === 1);
+            showToast(`Sisa waktu ${min} menit!`, min === 1);
           }
         });
       }
@@ -1103,12 +1617,20 @@ Pembahasan: penjelasan singkat</pre>
         }, 500);
       }
 
+      let lastShownIdx = -1;
       function renderQuestion() {
         const q = currentQuestions[currentIndex], type = q.type || "pg", multi = type === "pgk";
         const revisit = pos >= currentQuestions.length;
         $("questionNumberIndicator").innerText =
           `Soal ${currentIndex + 1} dari ${currentQuestions.length}` + (revisit ? " · Tinjau Ragu-Ragu" : "");
-        $("jumpQuestionSelect").value = currentIndex;
+        document.body.classList.toggle("revisit-mode", revisit && !finished);
+        if (lastShownIdx !== currentIndex) {
+          const g = $("qGrid");
+          g.classList.remove("q-in");
+          void g.offsetWidth;
+          g.classList.add("q-in");
+          lastShownIdx = currentIndex;
+        }
         if (q.stimPage) showStimFile(q);
         else {
           hideStimFile();
@@ -1149,7 +1671,7 @@ Pembahasan: penjelasan singkat</pre>
         } else
           q.options.forEach((opt, idx) => {
             const sel = multi ? (cur || []).includes(idx) : cur === idx;
-            const mark = multi ? (sel ? "☑" : "☐") : sel ? "●" : "○";
+            const mark = multi ? (sel ? "■" : "□") : sel ? "●" : "○";
             const btn = document.createElement("button");
             btn.className = `w-full text-left p-3 border rounded-lg text-[15px] transition flex items-center gap-3 ${sel ? "border-indigo-600 bg-indigo-50 text-indigo-900 font-semibold" : "border-slate-200 hover:bg-slate-50"}`;
             btn.onclick = () => {
@@ -1167,6 +1689,8 @@ Pembahasan: penjelasan singkat</pre>
         $("raguTag").classList.toggle("hidden", !r);
         document.querySelector("#raguBtn span").innerText = r ? "Batal Ragu" : "Tandai Ragu";
         $("nextBtn").classList.toggle("hidden", pos >= seq.length - 1);
+        renderNavPanel();
+        saveSession();
         typeset($("quizView"));
       }
       function jumpToQuestion(idx) {
@@ -1187,23 +1711,58 @@ Pembahasan: penjelasan singkat</pre>
       function nextQuestion() {
         if (pos < seq.length - 1) { pos++; currentIndex = seq[pos]; renderQuestion(); }
       }
+      function askBlank(blankIdx) {
+        return new Promise((resolve) => {
+          const m = $("blankModal"), chips = $("blankChips");
+          $("blankTitle").innerText = `Masih ada ${blankIdx.length} soal yang kosong`;
+          chips.innerHTML = "";
+          const done = (v) => {
+            m.classList.add("hidden");
+            $("blankWork").onclick = null;
+            $("blankFinish").onclick = null;
+            resolve(v);
+          };
+          blankIdx.forEach((i) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-semibold hover:bg-rose-200";
+            b.innerText = i + 1;
+            b.onclick = () => done(i);
+            chips.appendChild(b);
+          });
+          $("blankWork").onclick = () => done(blankIdx[0]);
+          $("blankFinish").onclick = () => done(null);
+          m.classList.remove("hidden");
+        });
+      }
       async function finishQuizConfirm() {
-        const blank = currentQuestions.filter((q, i) => !answered(userAnswers[i])).length;
-        const msg = blank
-          ? "Masih ada " + blank + " soal yang belum dijawab. Yakin ingin menyelesaikan ujian?"
+        const blankIdx = [];
+        currentQuestions.forEach((q, i) => { if (!answered(userAnswers[i])) blankIdx.push(i); });
+        if (blankIdx.length) {
+          const pick = await askBlank(blankIdx);
+          if (pick === null) finishQuiz();       // pilih: tetap selesaikan
+          else jumpToQuestion(pick);             // pilih: kerjakan soal kosong
+          return;
+        }
+        const raguN = Object.values(raguState).filter(Boolean).length;
+        const msg = raguN
+          ? "Masih ada " + raguN + " soal yang ditandai ragu-ragu. Yakin ingin menyelesaikan ujian?"
           : "Yakin ingin menyelesaikan latihan ujian?";
         if (await askConfirm(msg, "Selesai")) finishQuiz();
       }
 
       function finishQuiz() {
+        const initialMinutes = totalSeconds / 60;
         clearInterval(timerInterval);
         if (finished) return;
         finished = true;
+        examLive = false;
+        clearSession();
         hideToast();
         let correct = 0, wrong = 0, blank = 0, ragu = 0;
         const review = $("reviewList");
         review.innerHTML = "";
-        const detail = [];
+        const detail = [], missed = [];
         currentQuestions.forEach((q, idx) => {
           const ua = userAnswers[idx];
           let status;
@@ -1211,8 +1770,8 @@ Pembahasan: penjelasan singkat</pre>
           else if (isCorrect(q, ua)) { correct++; status = "Benar"; }
           else { wrong++; status = "Salah"; }
           if (raguState[idx]) ragu++;
-          if (status !== "Benar")
-            detail.push({
+          if (status !== "Benar") missed.push(q);
+          detail.push({
               n: idx + 1,
               s: status,
               t: TYPE_SHORT[q.type || "pg"],
@@ -1223,8 +1782,10 @@ Pembahasan: penjelasan singkat</pre>
           const color = status === "Benar" ? "text-emerald-600" : status === "Salah" ? "text-rose-600" : "text-slate-500";
           const div = document.createElement("div");
           div.className = "bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-1";
+          div.dataset.st = status;
+          div.dataset.r = raguState[idx] ? "1" : "0";
           div.innerHTML = `<div class="text-[10px] uppercase tracking-wide text-slate-400">${esc(TYPE_SHORT[q.type || "pg"])}</div>
-      <div class="font-semibold">${idx + 1}. ${esc(q.question)} <span class="${color}">[${status}]</span></div>
+      <div class="font-semibold">${idx + 1}. ${esc(q.question)} <span class="${color}">[${status}]</span>${raguState[idx] ? ' <span class="text-amber-600">· Ragu</span>' : ""}</div>
       <div>Jawabanmu: ${answered(ua) ? esc(fmtAns(q, ua)) : "-"}</div>
       <div>Kunci: ${hasKey(q) ? esc(fmtAns(q, q.answer)) : "<i>belum diisi</i>"}</div>
       ${q.discussion ? `<div class="text-slate-600"><b>Pembahasan:</b> ${esc(q.discussion)}</div>` : ""}`;
@@ -1236,7 +1797,7 @@ Pembahasan: penjelasan singkat</pre>
           id: "h_" + Date.now(),
           time: Date.now(),
           subject: currentSubject,
-          packages: [...new Set(currentQuestions.map((q) => q.packageName || "Soal Demo"))],
+          packages: [...new Set(currentQuestions.map((q) => (q.packageName || "Soal Demo") + (isRetry ? " (Ulangi)" : "")))],
           total: currentQuestions.length,
           correct, wrong, blank, ragu, score, detail,
           seconds: Math.round((Date.now() - startTime) / 1000),
@@ -1246,18 +1807,28 @@ Pembahasan: penjelasan singkat</pre>
         $("wrongCount").innerText = wrong;
         $("blankCount").innerText = blank;
         $("raguCount").innerText = ragu;
+        lastResult = { subject: currentSubject, qs: missed, total: currentQuestions.length, minutes: initialMinutes };
+        const rb = $("retryBtn");
+        rb.classList.toggle("hidden", !missed.length);
+        rb.innerText = "Ulangi Soal Salah & Kosong (" + missed.length + ")";
+        $("reviewFilter").innerHTML = [["all", "Semua", currentQuestions.length], ["Benar", "Benar", correct], ["Salah", "Salah", wrong], ["Kosong", "Kosong", blank], ["ragu", "Ragu", ragu]]
+          .map(([k, l, n]) => `<button type="button" data-f="${k}" onclick="setReviewFilter('${k}')">${l} (${n})</button>`)
+          .join("");
+        setReviewFilter("all");
         $("quizView").classList.add("hidden");
         $("resultView").classList.remove("hidden");
         resultReady = true;
         history.replaceState(null, "", "#hasil");
         typeset(review);
+        setTimeout(() => typeset(review), 600);
       }
 
       // Membaca file ke kolom teks, dengan status yang terlihat di halaman.
+      // ===== 6. Impor soal dari file (PDF/TXT) & parsing =====
       async function loadIntoTextarea(file, textareaId, statusId, reflow) {
         const st = $(statusId);
         st.className = "text-slate-500";
-        st.innerText = "⏳ Membaca " + file.name + "...";
+        st.innerText = "Membaca " + file.name + "...";
         try {
           let text = await readTextOrPdf(file, true);
           if (!text.trim())
@@ -1266,13 +1837,13 @@ Pembahasan: penjelasan singkat</pre>
           $(textareaId).value = text;
           st.className = "text-emerald-600";
           st.innerText =
-            "✅ " + file.name + ": " + text.length + " karakter terbaca" +
+            "✓ " + file.name + ": " + text.length + " karakter terbaca" +
             (reflow ? ", " + splitStimuli(text).length + " stimulus terdeteksi" : "") +
             ". Isi bisa diperbaiki lewat tombol Ubah Soal sebelum diproses.";
           return true;
         } catch (err) {
           st.className = "text-rose-600";
-          st.innerText = "❌ " + (err && err.message ? err.message : "Gagal membaca file.");
+          st.innerText = "✕ " + (err && err.message ? err.message : "Gagal membaca file.");
           return false;
         }
       }
@@ -1602,7 +2173,7 @@ Pembahasan: penjelasan singkat</pre>
           packageImages[packageId] = pendingImages.slice();
           if (!saveImages()) {
             delete packageImages[packageId];
-            imgNote = " ⚠ Gambar gagal disimpan (penyimpanan penuh); paket tersimpan tanpa gambar.";
+            imgNote = " ! Gambar gagal disimpan (penyimpanan penuh); paket tersimpan tanpa gambar.";
           }
         }
         saveToLocalStorage();
@@ -1616,17 +2187,19 @@ Pembahasan: penjelasan singkat</pre>
         $("stimFileInput").value = "";
         renderCustomList();
         toggleRawEdit(false);
+        setMgStep(1);
         $("customQuestionsList").scrollIntoView({ behavior: "smooth", block: "start" });
 
         const review = imported.filter((q) => q.needsReview).length;
         showToast(
-          (lastSaveOk ? "✅ " : "⚠ Belum tersimpan permanen (penyimpanan browser diblokir/penuh). ") +
+          (lastSaveOk ? "✓ " : "! Belum tersimpan permanen (penyimpanan browser diblokir/penuh). ") +
             "Paket ditambahkan: " + packageName + " (" + imported.length + " soal)." +
             warnStim + warnType + warnImg + imgNote +
             (review ? " " + review + " soal perlu diperiksa (opsi/kunci belum terbaca), cek di Kelola Soal." : ""),
         );
       }
 
+      // ===== Dialog konfirmasi =====
       function askConfirm(msg, yes = "Ya", danger = false) {
         return new Promise((resolve) => {
           const m = $("confirmModal"), y = $("confirmYes"), n = $("confirmNo");
@@ -1649,19 +2222,10 @@ Pembahasan: penjelasan singkat</pre>
       let packageImages = {}, pendingImages = [], imgNote = "";
       const MARK = /[\[(]\s*(?:gambar|foto|img|image)\s*[:#]?\s*(\d+)\s*[\])]/i;
       function loadImages() {
-        try {
-          packageImages = JSON.parse(localStorage.getItem("tka_master_images_v1") || "{}") || {};
-        } catch (e) {
-          packageImages = {};
-        }
+        packageImages = store.get(KEYS.images, {}) || {};
       }
       function saveImages() {
-        try {
-          localStorage.setItem("tka_master_images_v1", JSON.stringify(packageImages));
-          return true;
-        } catch (e) {
-          return false;
-        }
+        return store.set(KEYS.images, packageImages);
       }
       function stimHtml(q) {
         const imgs = packageImages[q.packageId] || [];
@@ -1717,6 +2281,7 @@ Pembahasan: penjelasan singkat</pre>
         renderPendingImages();
       }
       function renderPendingImages() {
+        if (!$("stimulusImagePreview")) return;
         $("stimulusImagePreview").innerHTML =
           pendingImages
             .map(
@@ -1733,19 +2298,10 @@ Pembahasan: penjelasan singkat</pre>
       // ===== Stimulus berupa FILE (PDF / gambar): terbuka otomatis, 1 stimulus = 1 halaman, bisa zoom =====
       let stimMode = "teks", pendingStimFiles = [], stimFiles = {};
       function loadStimMeta() {
-        try {
-          stimFiles = JSON.parse(localStorage.getItem("tka_master_stimfiles_v1") || "{}") || {};
-        } catch (e) {
-          stimFiles = {};
-        }
+        stimFiles = store.get(KEYS.stimFiles, {}) || {};
       }
       function saveStimMeta() {
-        try {
-          localStorage.setItem("tka_master_stimfiles_v1", JSON.stringify(stimFiles));
-          return true;
-        } catch (e) {
-          return false;
-        }
+        return store.set(KEYS.stimFiles, stimFiles);
       }
       // Halaman ke-n (mulai 1) dari seluruh file stimulus satu paket.
       function stimPageInfo(pkg, n) {
@@ -1767,11 +2323,54 @@ Pembahasan: penjelasan singkat</pre>
         delete stimFiles[pkg];
         saveStimMeta();
       }
+      // ===== Langkah-langkah tambah paket =====
+      let mgStep = 1;
+      function paintMgSteps() {
+        document.querySelectorAll("#mgSteps li[data-s]").forEach((li) => {
+          const n = +li.dataset.s, d = li.querySelector(".mg-dot");
+          d.className = "mg-dot w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center " +
+            (n < mgStep ? "bg-emerald-500 text-white" : n === mgStep ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400");
+          d.innerText = n < mgStep ? "✓" : n;
+          li.classList.toggle("text-slate-400", n > mgStep);
+        });
+        $("mgStepLbl").innerText = "Langkah " + mgStep + " dari 3";
+        [1, 2, 3].forEach((n) => $("mgStep" + n).classList.toggle("hidden", n !== mgStep));
+        $("mgBackBtn").classList.toggle("hidden", mgStep === 1);
+        $("mgNextBtn").classList.toggle("hidden", mgStep === 3);
+        $("mgSaveBtn").classList.toggle("hidden", mgStep !== 3);
+        if (mgStep === 3) renderMgSummary();
+      }
+      function setMgStep(n) {
+        mgStep = n;
+        paintMgSteps();
+      }
+      function mgStepGo(d) {
+        if (d > 0 && mgStep === 2) {
+          if (!normalizeImportedText($("soalTextInput").value)) { showToast("Pilih file soal terlebih dahulu (File 2).", true); return; }
+          if (stimMode === "file" && !pendingStimFiles.length) { showToast("Pilih file stimulus (PDF atau gambar) terlebih dahulu.", true); return; }
+        }
+        setMgStep(Math.max(1, Math.min(3, mgStep + d)));
+        $("mgSteps").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+      function renderMgSummary() {
+        const box = $("mgSummary");
+        if (!box || mgStep !== 3) return;
+        const soalFile = $("soalFileInput").files[0], typed = $("packageNameInput").value.trim();
+        const name = typed || (soalFile ? soalFile.name.replace(/\.[^.]+$/, "") : "otomatis");
+        const nSoal = splitQuestionBlocks(normalizeImportedText($("soalTextInput").value)).length;
+        const stim = stimMode === "file"
+          ? "File · " + pendingStimFiles.length + " berkas (" + pendingStimFiles.reduce((a, x) => a + x.pages, 0) + " halaman)"
+          : $("stimulusTextInput").value.trim() ? "Teks · terisi" : "Teks · kosong (tanpa stimulus)";
+        const row = (k, v) => `<div class="flex justify-between gap-3"><span class="text-slate-400">${k}</span><span class="font-medium text-right">${esc(v)}</span></div>`;
+        box.innerHTML =
+          row("Mata pelajaran", SUBJECT_NAME[$("targetSubject").value] || "") + row("Nama paket", name) + row("Stimulus", stim) +
+          row("Soal terdeteksi", nSoal ? nSoal + " soal" : "belum ada");
+      }
       function toggleRawEdit(force) {
         const box = $("rawEditBox");
         const on = force === undefined ? box.classList.contains("hidden") : force;
         box.classList.toggle("hidden", !on);
-        $("rawEditBtn").innerText = on ? "✕ Tutup Ubah Soal" : "✏️ Ubah Soal";
+        $("rawEditBtn").innerText = on ? "Tutup Ubah Soal" : "Ubah Soal";
         if (on) $("rawStimWrap").classList.toggle("hidden", stimMode === "file");
       }
       function setStimMode(m) {
@@ -1808,7 +2407,7 @@ Pembahasan: penjelasan singkat</pre>
       async function handleStimFiles(e) {
         const st = $("stimFileStatus"), bad = [];
         st.className = "text-slate-500";
-        st.innerText = "⏳ Membaca file...";
+        st.innerText = "Membaca file...";
         for (const f of Array.from(e.target.files)) {
           if (!isImg(f) && !isPdf(f)) { bad.push(f.name + " (hanya PDF atau gambar)"); continue; }
           try {
@@ -1821,7 +2420,7 @@ Pembahasan: penjelasan singkat</pre>
         renderStimFileList();
         if (bad.length) {
           st.className = "text-rose-600";
-          st.innerText = "❌ Tidak bisa dipakai: " + bad.join("; ");
+          st.innerText = "✕ Tidak bisa dipakai: " + bad.join("; ");
         }
       }
       function renderStimFileList() {
@@ -1829,7 +2428,7 @@ Pembahasan: penjelasan singkat</pre>
         list.innerHTML = pendingStimFiles
           .map(
             (x, i) => `<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
-      <span>${isImg(x) ? "🖼" : "📄"}</span><span class="flex-grow min-w-0 truncate">${esc(x.name)}</span>
+      <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide w-8 shrink-0">${isImg(x) ? "Img" : "PDF"}</span><span class="flex-grow min-w-0 truncate">${esc(x.name)}</span>
       <span class="text-slate-400 whitespace-nowrap">${x.pages} hal.</span>
       <button onclick="moveStimFile(${i},-1)" class="px-1.5 text-slate-500 hover:text-slate-800" aria-label="Naikkan">↑</button>
       <button onclick="moveStimFile(${i},1)" class="px-1.5 text-slate-500 hover:text-slate-800" aria-label="Turunkan">↓</button>
@@ -1839,7 +2438,7 @@ Pembahasan: penjelasan singkat</pre>
         const total = pendingStimFiles.reduce((a, x) => a + x.pages, 0);
         if (total) {
           st.className = "text-emerald-600";
-          st.innerText = "✅ " + total + " stimulus (halaman) siap dipakai. Stimulus 1 = halaman 1, dan seterusnya, sesuai urutan di atas.";
+          st.innerText = "✓ " + total + " stimulus (halaman) siap dipakai. Stimulus 1 = halaman 1, dan seterusnya, sesuai urutan di atas.";
         } else st.innerText = "";
       }
       function moveStimFile(i, d) {
@@ -1913,7 +2512,7 @@ Pembahasan: penjelasan singkat</pre>
       async function drawStim(info, tok) {
         const stage = $("stimStage");
         if (!stage) return;
-        stage.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">⏳ Membuka file...</div>';
+        stage.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">Membuka file...</div>';
         try {
           if (!info) throw new Error("File stimulus untuk nomor ini tidak ditemukan.");
           const f = info.file;
@@ -2044,10 +2643,11 @@ Pembahasan: penjelasan singkat</pre>
         renderCustomList();
       }
       // Kelola Soal = halaman penuh (bukan popup)
+      // ===== 7. Kelola Soal =====
       function openManage() {
         nav("kelola");
         hideToast();
-        ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "materiView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
+        hideViews("manageView");
         $("manageView").classList.remove("hidden");
         $("mgEdit").classList.add("hidden");
         $("mgMain").classList.remove("hidden");
@@ -2256,7 +2856,7 @@ Pembahasan: penjelasan singkat</pre>
         list.innerHTML = units
           .map(
             (u) => `<button class="mg-pkg w-full text-left bg-white border border-slate-200 rounded-xl px-4 py-3 hover:shadow-md transition flex items-center gap-2" data-k="${esc(u.key)}">
-        <span class="flex-grow min-w-0"><span class="block font-semibold text-sm truncate">${u.questions.some((q) => q.needsReview) ? "⚠ " : ""}${esc(u.name)}</span><span class="text-slate-400">${u.questions.length} soal</span></span><span class="text-slate-400">›</span></button>`,
+        <span class="flex-grow min-w-0"><span class="block font-semibold text-sm truncate">${u.questions.some((q) => q.needsReview) ? "! " : ""}${esc(u.name)}</span><span class="text-slate-400">${u.questions.length} soal</span></span><span class="text-slate-400">›</span></button>`,
           )
           .join("");
         list.querySelectorAll(".mg-pkg").forEach((b) => { b.onclick = () => openMgEdit(b.dataset.k); });
@@ -2288,7 +2888,7 @@ Pembahasan: penjelasan singkat</pre>
           mgTimer = null;
           saveToLocalStorage();
           const s2 = $("mgStatus");
-          if (s2) s2.innerText = lastSaveOk ? "✓ Tersimpan otomatis" : "⚠ Gagal menyimpan (penyimpanan penuh)";
+          if (s2) s2.innerText = lastSaveOk ? "✓ Tersimpan otomatis" : "! Gagal menyimpan (penyimpanan penuh)";
         }, 350);
       }
       function mgFlush() {
@@ -2310,7 +2910,7 @@ Pembahasan: penjelasan singkat</pre>
       function mgQCard(q, i) {
         const t = q.type || "pg";
         return `<details data-q="${esc(q.id)}" class="border border-slate-200 rounded-lg">
-  <summary class="cursor-pointer px-3 py-2.5 flex items-center gap-2"><span class="font-semibold">${i + 1}.</span><span data-r="type" class="text-[10px] uppercase tracking-wide text-slate-400 whitespace-nowrap">${esc(TYPE_SHORT[t])}</span><span data-r="title" class="truncate min-w-0 flex-grow">${esc(q.question)}</span><span data-r="warn" class="text-amber-600">${q.needsReview ? "⚠" : ""}</span></summary>
+  <summary class="cursor-pointer px-3 py-2.5 flex items-center gap-2"><span class="font-semibold">${i + 1}.</span><span data-r="type" class="text-[10px] uppercase tracking-wide text-slate-400 whitespace-nowrap">${esc(TYPE_SHORT[t])}</span><span data-r="title" class="truncate min-w-0 flex-grow">${esc(q.question)}</span><span data-r="warn" class="text-amber-600">${q.needsReview ? "!" : ""}</span></summary>
   <div class="p-3 space-y-3 border-t border-slate-100">
     <div>${mgLbl("Jenis soal")}<select data-f="type" class="${MG_F}">${MG_TYPES.map(([v, l]) => `<option value="${v}"${v === t ? " selected" : ""}>${l}</option>`).join("")}</select></div>
     <div>${mgLbl("Pertanyaan")}<textarea data-f="question" rows="3" class="${MG_F}">${esc(q.question)}</textarea></div>
@@ -2341,7 +2941,7 @@ Pembahasan: penjelasan singkat</pre>
         const box = $("mgEdit");
         box.classList.remove("hidden");
         box.innerHTML =
-          `<div class="flex items-center justify-between"><button onclick="closeMgEdit()" class="text-sm text-slate-500 hover:text-slate-800">← Kembali</button><span id="mgStatus" class="text-[11px] text-slate-400">✓ Tersimpan otomatis</span></div>
+          `<div class="flex items-center justify-between"><button onclick="closeMgEdit()" class="text-sm text-slate-500 hover:text-slate-800">← Kembali</button><span class="flex items-center gap-1"><span id="mgStatus" class="text-[11px] text-slate-400">✓ Tersimpan otomatis</span><button onclick="kebab(event, mgDelPkg)" class="kebab-btn" aria-label="Opsi paket" title="Opsi">⋮</button></span></div>
     <input data-f="name" maxlength="80" value="${esc(u.name)}" aria-label="Nama paket" class="${MG_F} !text-lg font-bold"/>` +
           groups
             .map(
@@ -2350,14 +2950,13 @@ Pembahasan: penjelasan singkat</pre>
         g.pg
           ? (() => {
               const inf = stimPageInfo(mg.pkg, g.pg);
-              return `<div>${mgLbl("Stimulus " + g.pg + " · " + g.items.length + " soal")}<div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-600">📄 File stimulus · halaman ${g.pg}<br><span class="text-[11px] text-slate-400">${esc(inf ? inf.file.name + (inf.file.pages > 1 ? " (hal. " + inf.page + ")" : "") : "file tidak ditemukan")}</span></div></div>`;
+              return `<div>${mgLbl("Stimulus " + g.pg + " · " + g.items.length + " soal")}<div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-600">File stimulus · halaman ${g.pg}<br><span class="text-[11px] text-slate-400">${esc(inf ? inf.file.name + (inf.file.pages > 1 ? " (hal. " + inf.page + ")" : "") : "file tidak ditemukan")}</span></div></div>`;
             })()
           : `<div>${mgLbl("Stimulus " + (gi + 1) + " · " + g.items.length + " soal")}<textarea data-f="stim" data-g="${gi}" rows="4" class="${MG_F}">${esc(g.stim)}</textarea></div>`
       }
       <div class="space-y-2">${g.items.map((x) => mgQCard(x.q, x.i)).join("")}</div></section>`,
             )
-            .join("") +
-          `<button onclick="mgDelPkg()" class="text-rose-600 hover:underline pt-2">🗑 Hapus paket ini</button>`;
+            .join("");
         box.querySelectorAll("details").forEach(mgSync);
         window.scrollTo(0, 0);
       }
@@ -2416,7 +3015,7 @@ Pembahasan: penjelasan singkat</pre>
         });
         d.querySelector('[data-r="type"]').innerText = TYPE_SHORT[type];
         d.querySelector('[data-r="title"]').innerText = q.question;
-        d.querySelector('[data-r="warn"]').innerText = q.needsReview ? "⚠" : "";
+        d.querySelector('[data-r="warn"]').innerText = q.needsReview ? "!" : "";
         mgSync(d);
         mgSaved();
       }
@@ -2440,19 +3039,17 @@ Pembahasan: penjelasan singkat</pre>
         closeMgEdit();
       }
 
+      // ===== 8. Riwayat ujian =====
       function loadHistory() {
-        try {
-          const s = JSON.parse(localStorage.getItem("tka_master_history") || "[]");
-          examHistory = Array.isArray(s) ? s : [];
-        } catch (e) {
-          examHistory = [];
-        }
+        const h = store.get(KEYS.history, []);
+        examHistory = Array.isArray(h) ? h : [];
       }
       function saveHistory() {
+        setTimeout(() => { try { renderHome(); } catch (e) {} }, 0);
         examHistory = examHistory.slice(0, 200);
         for (let i = examHistory.length; i >= 0; i = i > 20 ? i - 20 : i - 1) {
           try {
-            localStorage.setItem("tka_master_history", JSON.stringify(examHistory));
+            localStorage.setItem(KEYS.history, JSON.stringify(examHistory));
             return;
           } catch (e) {
             // penyimpanan penuh: buang detail dari riwayat terlama lalu coba lagi
@@ -2476,7 +3073,7 @@ Pembahasan: penjelasan singkat</pre>
         }
         clearInterval(timerInterval);
         hideToast();
-        ["homeView", "quizOptionsView", "quizView", "resultView", "materiView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
+        hideViews("historyView");
         $("historyView").classList.remove("hidden");
         nav("riwayat");
         renderHistory();
@@ -2528,7 +3125,7 @@ Pembahasan: penjelasan singkat</pre>
         chart.innerHTML = `<div class="flex items-center justify-center gap-6 flex-wrap">
     <svg viewBox="0 0 120 120" class="w-32 h-32" role="img" aria-label="Diagram lingkaran jawaban">
       <circle cx="60" cy="60" r="${R}" fill="none" stroke="#e2e8f0" stroke-width="18"/>${arcs}
-      <text x="60" y="64" text-anchor="middle" font-size="16" font-weight="700" fill="#4f46e5">${pct(tot.c)}%</text>
+      <text x="60" y="64" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a5f">${pct(tot.c)}%</text>
     </svg>
     <div class="space-y-1.5 text-xs">${parts
       .map((p) => `<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${p[2]}"></span><span class="w-12">${p[0]}</span><b>${p[1]}</b><span class="text-slate-400">(${pct(p[1])}%)</span></div>`)
@@ -2564,16 +3161,16 @@ Pembahasan: penjelasan singkat</pre>
         <div class="text-slate-500">${esc(SUBJECT_NAME[x.subject] || x.subject)} · ${esc(d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }))}, ${esc(d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }))}</div>
         <div class="text-slate-400">${x.correct} benar · ${x.wrong} salah · ${x.blank} kosong · ${x.ragu} ragu · ${esc(fmtDur(x.seconds))}</div>
       </div>
-      <button class="hdel text-slate-400 hover:text-rose-600 p-1" aria-label="Hapus">🗑</button>
+      <button class="hdel kebab-btn" aria-label="Opsi">⋮</button>
       <span class="harr text-slate-400 transition-transform">›</span></div>
       <div class="hdetail hidden border-t border-slate-100 p-4 space-y-3 bg-slate-50"></div>`;
           const head = row.querySelector(".hrow"), box = row.querySelector(".hdetail");
-          row.querySelector(".hdel").onclick = (ev) => {
-            ev.stopPropagation();
-            examHistory = examHistory.filter((h) => h.id !== x.id);
-            saveHistory();
-            renderHistory();
-          };
+          row.querySelector(".hdel").onclick = (ev) =>
+            kebab(ev, () => {
+              examHistory = examHistory.filter((h) => h.id !== x.id);
+              saveHistory();
+              renderHistory();
+            });
           const toggle = () => {
             const open = box.classList.toggle("hidden") === false;
             head.setAttribute("aria-expanded", open);
@@ -2588,25 +3185,40 @@ Pembahasan: penjelasan singkat</pre>
           list.appendChild(row);
         });
       }
-      // Rincian soal yang salah / kosong pada satu riwayat
+      // Rincian seluruh soal (benar, salah, kosong) pada satu riwayat
       function historyDetailHtml(x) {
         if (!Array.isArray(x.detail))
-          return '<p class="text-slate-400 italic">Riwayat ini dibuat sebelum rincian jawaban disimpan, jadi letak soal yang salah tidak tersedia. Kerjakan ujian baru untuk melihat rincian.</p>';
-        const w = x.detail.filter((d) => d.s === "Salah"), b = x.detail.filter((d) => d.s === "Kosong");
-        const chips = (arr, cls) => arr.map((d) => `<span class="inline-block min-w-[2rem] text-center px-2 py-0.5 rounded-md font-semibold ${cls}">${d.n}</span>`).join(" ");
-        if (!x.detail.length) return '<p class="text-emerald-600 font-semibold">Semua soal dijawab benar. 🎉</p>';
-        return `<div class="space-y-1.5">
-      ${w.length ? `<div><span class="font-semibold text-rose-600">Salah di nomor:</span> ${chips(w, "bg-rose-100 text-rose-700")}</div>` : ""}
-      ${b.length ? `<div><span class="font-semibold text-slate-500">Kosong di nomor:</span> ${chips(b, "bg-slate-200 text-slate-600")}</div>` : ""}</div>
-      <div class="space-y-2">${x.detail
+          return '<p class="text-slate-400 italic">Riwayat ini dibuat sebelum rincian jawaban disimpan, jadi rincian soal tidak tersedia. Kerjakan ujian baru untuk melihat rincian.</p>';
+        const d = x.detail;
+        if (!d.length) return '<p class="text-emerald-600 font-semibold">Semua soal dijawab benar.</p>';
+        const by = (st) => d.filter((i) => i.s === st);
+        const chips = (arr, cls) => arr.map((i) => `<span class="inline-block min-w-[2rem] text-center px-2 py-0.5 rounded-md font-semibold ${cls}">${i.n}</span>`).join(" ");
+        const row = (label, arr, lc, cls) => (arr.length ? `<div><span class="font-semibold ${lc}">${label}</span> ${chips(arr, cls)}</div>` : "");
+        const legacy = d.length < (x.total || 0) && !by("Benar").length;
+        const fbtn = (f, l, n) => `<button type="button" data-f="${f}" onclick="histFilter(this)" class="hf px-3 py-1.5 rounded-full text-xs font-medium ${f === "all" ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-700 hover:bg-slate-300"}">${l} (${n})</button>`;
+        const col = { Benar: "text-emerald-600", Salah: "text-rose-600", Kosong: "text-slate-500" };
+        return `${legacy ? '<p class="text-[11px] text-slate-400 italic">Riwayat ini dibuat sebelum soal yang benar ikut disimpan, jadi hanya soal salah dan kosong yang tampil.</p>' : ""}
+      <div class="space-y-1.5">
+      ${row("Benar di nomor:", by("Benar"), "text-emerald-600", "bg-emerald-100 text-emerald-700")}
+      ${row("Salah di nomor:", by("Salah"), "text-rose-600", "bg-rose-100 text-rose-700")}
+      ${row("Kosong di nomor:", by("Kosong"), "text-slate-500", "bg-slate-200 text-slate-600")}</div>
+      <div class="flex flex-wrap gap-2">${fbtn("all", "Semua", d.length)}${fbtn("Benar", "Benar", by("Benar").length)}${fbtn("Salah", "Salah", by("Salah").length)}${fbtn("Kosong", "Kosong", by("Kosong").length)}</div>
+      <div class="space-y-2">${d
         .map(
-          (d) => `<div class="bg-white border border-slate-200 rounded-lg p-3 space-y-1">
-        <div class="text-[10px] uppercase tracking-wide text-slate-400">${esc(d.t)}</div>
-        <div class="font-semibold">${d.n}. ${esc(d.q)} <span class="${d.s === "Salah" ? "text-rose-600" : "text-slate-500"}">[${d.s}]</span></div>
-        <div>Jawabanmu: ${d.a ? esc(d.a) : "-"}</div>
-        <div>Kunci: ${d.k ? esc(d.k) : "<i>belum diisi</i>"}</div></div>`,
+          (i) => `<div class="hd-item bg-white border border-slate-200 rounded-lg p-3 space-y-1" data-s="${i.s}">
+        <div class="text-[10px] uppercase tracking-wide text-slate-400">${esc(i.t)}</div>
+        <div class="font-semibold">${i.n}. ${esc(i.q)} <span class="${col[i.s] || "text-slate-500"}">[${i.s}]</span></div>
+        <div>Jawabanmu: ${i.a ? esc(i.a) : "-"}</div>
+        <div>Kunci: ${i.k ? esc(i.k) : "<i>belum diisi</i>"}</div></div>`,
         )
         .join("")}</div>`;
+      }
+      function histFilter(btn) {
+        const box = btn.closest(".hdetail"), f = btn.dataset.f;
+        box.querySelectorAll(".hd-item").forEach((el) => el.classList.toggle("hidden", f !== "all" && el.dataset.s !== f));
+        box.querySelectorAll(".hf").forEach((b) => {
+          b.className = "hf px-3 py-1.5 rounded-full text-xs font-medium " + (b.dataset.f === f ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-700 hover:bg-slate-300");
+        });
       }
       async function clearHistory() {
         if (!(await askConfirm("Hapus semua riwayat hasil? Tindakan ini tidak bisa dibatalkan.", "Hapus", true))) return;
@@ -2628,10 +3240,7 @@ Pembahasan: penjelasan singkat</pre>
       window.addEventListener("hashchange", async () => {
         if (navSuppress) { navSuppress = false; return; }
         closeSetting();
-        [
-          "settingsPanel", "manageHelpModal", "materiReadModal", "materiEditModal",
-          "materiHelpModal", "folderModal", "aiModal", "backupModal",
-        ].forEach((id) => $(id).classList.add("hidden"));
+        closeAllModals();
         paintNav(curNav);
         const name = location.hash.slice(1);
         const inQuiz = !$("quizView").classList.contains("hidden") && !finished;
@@ -2652,7 +3261,7 @@ Pembahasan: penjelasan singkat</pre>
         else if (name === "kelola") openManage();
         else if (name === "materi" || name === "materi-folder") openMateri(name === "materi-folder");
         else if (name === "hasil" && resultReady) {
-          ["homeView", "quizOptionsView", "quizView", "historyView", "materiView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
+          hideViews("resultView");
           $("resultView").classList.remove("hidden");
         } else {
           if (name !== "beranda") history.replaceState(null, "", "#beranda");
@@ -2670,7 +3279,11 @@ Pembahasan: penjelasan singkat</pre>
         goHome();
       }
       // Mode ujian: taskbar disembunyikan, ikon pengaturan tema muncul di kanan atas
-      const syncFab = () => document.body.classList.toggle("in-quiz", !$("quizView").classList.contains("hidden"));
+      const syncFab = () => {
+        const inQ = !$("quizView").classList.contains("hidden");
+        document.body.classList.toggle("in-quiz", inQ);
+        if (!inQ) document.body.classList.remove("revisit-mode");
+      };
       new MutationObserver(syncFab).observe($("quizView"), { attributes: true, attributeFilter: ["class"] });
       syncFab();
 
@@ -2700,7 +3313,7 @@ Pembahasan: penjelasan singkat</pre>
 
       let materiData = { folders: [] }, materiEditId = null, mDraft = null, readUrls = [], readToken = 0, pdfIOs = [];
 
-      // ===== Materi (folder) =====
+      // ===== 9. Materi (folder) =====
       let materiFolderId = null;
       // >>> BISA DIGANTI: folder dan materi contoh yang muncul pertama kali (nama folder, judul, isi)
       function materiDefault() {
@@ -2734,12 +3347,12 @@ Pembahasan: penjelasan singkat</pre>
       }
       function loadMateri() {
         try {
-          const s = localStorage.getItem("tka_master_materi_v2");
+          const s = localStorage.getItem(KEYS.materi);
           if (s) {
             const p = JSON.parse(s);
             if (p && Array.isArray(p.folders)) { materiData = p; return; }
           }
-          const old = localStorage.getItem("tka_master_materi_v1");
+          const old = localStorage.getItem(KEYS.materiOld);
           if (old) {
             const o = JSON.parse(old);
             materiData = {
@@ -2754,11 +3367,8 @@ Pembahasan: penjelasan singkat</pre>
         materiData = materiDefault();
       }
       function saveMateri() {
-        try {
-          localStorage.setItem("tka_master_materi_v2", JSON.stringify(materiData));
-        } catch (e) {
+        if (!store.set(KEYS.materi, materiData))
           showToast("Materi belum tersimpan permanen (penyimpanan browser diblokir/penuh).", true);
-        }
       }
       function fmtMateri(t) {
         return esc(t)
@@ -2779,7 +3389,7 @@ Pembahasan: penjelasan singkat</pre>
         if (!keepFolder) materiFolderId = null;
         clearInterval(timerInterval);
         hideToast();
-        ["homeView", "quizOptionsView", "quizView", "resultView", "historyView", "manageView", "settingsView"].forEach((id) => $(id).classList.add("hidden"));
+        hideViews("materiView");
         $("materiView").classList.remove("hidden");
         nav(materiFolderId ? "materi-folder" : "materi");
         renderMateri();
@@ -2796,7 +3406,7 @@ Pembahasan: penjelasan singkat</pre>
       let materiQuery = "", materiQFolder = null;
       function matchMateri(m, q) {
         if (!q) return true;
-        const hay = (m.title + " " + (m.mode === "file" ? (m.files || []).map((x) => x.name).join(" ") : m.content || "")).toLowerCase();
+        const hay = (m.title + " " + (m.mode === "file" ? (m.files || []).map((x) => x.name).join(" ") : m.content || "") + " " + (m.note || "")).toLowerCase();
         return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
       }
       function onMateriSearch(v) {
@@ -2808,11 +3418,27 @@ Pembahasan: penjelasan singkat</pre>
           nImg = fileMode ? m.files.filter(isImg).length : 0,
           nDoc = fileMode ? m.files.length - nImg : 0;
         const badge = fileMode
-          ? `\ud83d\udcc4 ${nDoc} file${nImg ? " \u00b7 \ud83d\uddbc " + nImg + " gambar" : ""}`
-          : "\ud83d\udcdd Teks";
-        return `<div class="bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:shadow-md transition" onclick="openMateriRead('${m.id}')">
-    <div class="min-w-0"><div class="font-semibold text-sm truncate">${esc(m.title)}</div><div class="text-[11px] text-slate-400">${folderName ? "\ud83d\udcc1 " + esc(folderName) + " \u00b7 " : ""}${badge} \u00b7 Diubah ${esc(new Date(m.updated).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }))}</div></div>
-    <button onclick="event.stopPropagation(); deleteMateri('${m.id}')" class="ml-3 text-slate-400 hover:text-rose-600" aria-label="Hapus materi">\ud83d\uddd1</button></div>`;
+          ? `${nDoc} file${nImg ? " \u00b7 " + nImg + " gambar" : ""}`
+          : "Teks";
+        const kind = !fileMode ? "TXT" : nDoc ? "PDF" : "IMG";
+        return `<div class="bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition" onclick="openMateriRead('${m.id}')">
+    <div class="w-10 h-10 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-bold flex items-center justify-center">${kind}</div>
+    <div class="min-w-0 flex-grow"><div class="font-semibold text-sm truncate">${esc(m.title)}</div><div class="text-[11px] text-slate-400">${folderName ? esc(folderName) + " \u00b7 " : ""}${badge} \u00b7 Diubah ${esc(new Date(m.updated).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }))}</div></div>
+    <button onclick="materiMenu(event, '${m.id}')" class="kebab-btn" aria-label="Opsi materi">\u22ee</button></div>`;
+      }
+      // Isi menu ⋮ per materi / folder. Item "Hapus" selalu ditambahkan otomatis oleh kebab().
+      // Mau tambah aksi baru? Cukup tambah satu baris { label, fn } di sini.
+      const materiMenuItems = (id) => [
+        { label: "Tambah Teks", fn: () => openMateriAdd(id) },
+        { label: "Ubah Nama", fn: () => openRename("materi", id) },
+      ];
+      const folderMenuItems = (id) => [{ label: "Ubah Nama", fn: () => openRename("folder", id) }];
+      const materiMenu = (ev, id, fromReader) => kebab(ev, () => deleteMateri(id, fromReader), materiMenuItems(id));
+      const folderMenu = (ev, id) => kebab(ev, () => deleteFolder(id), folderMenuItems(id));
+      let materiRecentOpen = false;
+      function toggleMateriRecent() {
+        materiRecentOpen = !materiRecentOpen;
+        renderMateriList();
       }
       function renderMateriList() {
         const box = $("materiList");
@@ -2823,23 +3449,39 @@ Pembahasan: penjelasan singkat</pre>
         if (!f) {
           const folders = materiData.folders.filter((x) => !q || x.name.toLowerCase().includes(q.toLowerCase()));
           const tiles = folders
-            .map(
-              (x) => `<div class="relative bg-white border border-slate-200 rounded-xl px-2 pt-5 pb-3 text-center cursor-pointer hover:shadow-md transition" onclick="openMateriFolder('${x.id}')">
-      <button onclick="event.stopPropagation(); deleteFolder('${x.id}')" class="absolute top-1 right-1 w-6 h-6 rounded-md text-xs text-slate-400 hover:text-rose-600 hover:bg-rose-50" aria-label="Hapus folder">\ud83d\uddd1</button>
-      <svg viewBox="0 0 24 24" class="w-12 h-12 mx-auto" aria-hidden="true"><path d="M2.5 6.5a2 2 0 0 1 2-2h4l2 2.2h9a2 2 0 0 1 2 2v8.8a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z" fill="#f59e0b"/><path d="M2.5 10h19v7.5a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z" fill="#fbbf24"/></svg>
-      <div class="text-xs font-semibold mt-2 line-clamp-2 break-words">${esc(x.name)}</div>
-      <div class="text-[10px] text-slate-400 mt-0.5">${x.items.length} materi</div></div>`,
-            )
+            .map((x) => {
+              const last = x.items.length ? Math.max(...x.items.map((m) => m.updated || 0)) : 0;
+              const initial = esc((x.name.trim()[0] || "?").toUpperCase());
+              return `<div class="relative bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:shadow-md transition" onclick="openMateriFolder('${x.id}')">
+      <button onclick="folderMenu(event, '${x.id}')" class="kebab-btn absolute top-1 right-1" aria-label="Opsi folder">\u22ee</button>
+      <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 font-bold text-sm flex items-center justify-center mb-3">${initial}</div>
+      <div class="text-sm font-semibold line-clamp-2 break-words pr-3">${esc(x.name)}</div>
+      <div class="text-[11px] text-slate-400 mt-0.5">${x.items.length} materi${last ? " \u00b7 " + new Date(last).toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : ""}</div></div>`;
+            })
             .join("");
           const found = q
             ? materiData.folders.flatMap((x) => x.items.filter((m) => matchMateri(m, q)).map((m) => ({ m, fn: x.name })))
             : [];
           if (!tiles && !found.length) {
-            box.innerHTML = q ? noHit : empty("Belum ada folder. Tekan \u201c\uff0b Folder\u201d untuk membuat.");
+            box.innerHTML = q
+              ? noHit
+              : `<div class="bg-white border border-slate-200 rounded-xl p-8 text-center space-y-3"><div class="w-12 h-12 mx-auto rounded-xl bg-indigo-50 text-indigo-600 text-xl font-bold flex items-center justify-center">\uff0b</div><div class="text-sm font-semibold">Belum ada folder</div><p class="text-xs text-slate-400">Buat folder pertama untuk menyimpan materi, catatan, atau file belajar.</p><button onclick="openFolderModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg">Buat Folder</button></div>`;
             return;
           }
+          const totalM = materiData.folders.reduce((n, x) => n + x.items.length, 0);
+          const recent = q
+            ? []
+            : materiData.folders
+                .flatMap((x) => x.items.map((m) => ({ m, fn: x.name })))
+                .sort((a, b) => (b.m.updated || 0) - (a.m.updated || 0))
+                .slice(0, 3);
           box.innerHTML =
-            (tiles ? `<div class="grid grid-cols-3 gap-3">${tiles}</div>` : "") +
+            (!q ? `<p class="text-[11px] text-slate-400 mb-3">${materiData.folders.length} folder \u00b7 ${totalM} materi</p>` : "") +
+            (tiles ? `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${tiles}</div>` : "") +
+            (recent.length
+              ? `<button onclick="toggleMateriRecent()" aria-expanded="${materiRecentOpen}" class="w-full flex items-center justify-between bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium hover:shadow-md transition mt-6"><span>Terakhir diubah</span><span class="flex items-center gap-2 text-xs text-slate-400">${recent.length} materi<span class="inline-block transition-transform" style="transform:rotate(${materiRecentOpen ? 90 : 0}deg)">\u203a</span></span></button>` +
+                (materiRecentOpen ? `<div class="space-y-2 mt-2">${recent.map((r) => materiRow(r.m, r.fn)).join("")}</div>` : "")
+              : "") +
             (found.length
               ? `<div class="text-xs font-semibold text-slate-500 mt-4 mb-2">Materi ditemukan (${found.length})</div><div class="space-y-2">${found.map((r) => materiRow(r.m, r.fn)).join("")}</div>`
               : "");
@@ -2858,7 +3500,7 @@ Pembahasan: penjelasan singkat</pre>
         }
         const top = (title, label, fn) =>
           `<div class="flex items-center justify-between"><button onclick="materiBack()" class="text-sm text-slate-500 hover:text-slate-800">\u2190 Kembali</button><div class="flex items-center gap-2"><button onclick="openMateriHelp()" class="w-8 h-8 rounded-full border border-slate-300 text-slate-500 hover:bg-slate-100 text-sm font-bold" aria-label="Pengaturan materi" title="Pengaturan materi">?</button><button onclick="${fn}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg">\uff0b ${label}</button></div></div><h2 class="text-xl font-bold truncate">${esc(title)}</h2>`;
-        const search = `<input type="search" id="materiSearch" autocomplete="off" value="${esc(materiQuery)}" oninput="onMateriSearch(this.value)" placeholder="\ud83d\udd0d Cari materi (judul, isi, atau nama file)..." class="w-full p-3 border border-slate-300 rounded-xl text-sm bg-white shadow-sm"/>`;
+        const search = `<input type="search" id="materiSearch" autocomplete="off" value="${esc(materiQuery)}" oninput="onMateriSearch(this.value)" placeholder="Cari materi (judul, isi, atau nama file)..." class="w-full p-3 border border-slate-300 rounded-xl text-sm bg-white shadow-sm"/>`;
         v.innerHTML =
           (f ? top(f.name, "Materi", "openMateriEdit(null)") : top("Materi", "Folder", "openFolderModal()")) +
           search + '<div id="materiList"></div>';
@@ -2870,7 +3512,25 @@ Pembahasan: penjelasan singkat</pre>
       function closeMateriHelp() {
         $("materiHelpModal").classList.add("hidden");
       }
+      let renameCtx = null;
+      function openRename(type, id) {
+        const obj = type === "folder" ? materiData.folders.find((x) => x.id === id) : findMateri(id);
+        if (!obj) return;
+        renameCtx = { type, id };
+        $("folderModalTitle").innerText = type === "folder" ? "Ubah Nama Folder" : "Ubah Nama Materi";
+        $("folderSaveBtn").innerText = "Simpan";
+        $("folderNameInput").maxLength = type === "folder" ? 40 : 120;
+        $("folderNameInput").placeholder = type === "folder" ? "Nama folder" : "Nama materi";
+        $("folderNameInput").value = type === "folder" ? obj.name : obj.title;
+        $("folderModal").classList.remove("hidden");
+        setTimeout(() => { const i = $("folderNameInput"); i.focus(); i.select(); }, 50);
+      }
       function openFolderModal() {
+        renameCtx = null;
+        $("folderModalTitle").innerText = "Folder Baru";
+        $("folderSaveBtn").innerText = "Buat";
+        $("folderNameInput").maxLength = 40;
+        $("folderNameInput").placeholder = "Nama folder";
         $("folderNameInput").value = "";
         $("folderModal").classList.remove("hidden");
         setTimeout(() => $("folderNameInput").focus(), 50);
@@ -2880,6 +3540,25 @@ Pembahasan: penjelasan singkat</pre>
       }
       function saveFolder() {
         const name = $("folderNameInput").value.trim();
+        if (renameCtx) {
+          if (!name) { showToast("Nama tidak boleh kosong.", true); return; }
+          if (renameCtx.type === "folder") {
+            const f = materiData.folders.find((x) => x.id === renameCtx.id);
+            if (f) f.name = name;
+          } else {
+            const m = findMateri(renameCtx.id);
+            if (m) {
+              m.title = name;
+              m.updated = Date.now();
+              if (!$("materiReadModal").classList.contains("hidden")) $("materiReadTitle").innerText = name;
+            }
+          }
+          renameCtx = null;
+          saveMateri();
+          closeFolderModal();
+          renderMateri();
+          return;
+        }
         if (!name) { showToast("Nama folder wajib diisi.", true); return; }
         materiData.folders.push({ id: "f_" + Date.now(), name, items: [] });
         saveMateri();
@@ -2957,7 +3636,7 @@ Pembahasan: penjelasan singkat</pre>
           closeMateriRead();
           openMateriEdit(id);
         };
-        $("materiDelBtn").onclick = () => deleteMateri(id, true);
+        $("materiDelBtn").onclick = (ev) => materiMenu(ev, id, true);
         $("materiReadModal").classList.remove("hidden");
         if (m.mode !== "file") {
           body.innerHTML = fmtMateri(m.content);
@@ -2970,7 +3649,7 @@ Pembahasan: penjelasan singkat</pre>
         body.appendChild(wrap);
         for (const f of m.files) {
           const sec = document.createElement("div");
-          sec.innerHTML = `<div class="text-xs font-semibold text-slate-500 mb-2 break-words">${isImg(f) ? "\ud83d\uddbc" : "\ud83d\udcc4"} ${esc(f.name)} <span class="font-normal text-slate-400">\u00b7 ${fmtSize(f.size)}</span></div>`;
+          sec.innerHTML = `<div class="text-xs font-semibold text-slate-500 mb-2 break-words">${isImg(f) ? "Gambar" : "PDF"} \u00b7 ${esc(f.name)} <span class="font-normal text-slate-400">\u00b7 ${fmtSize(f.size)}</span></div>`;
           const holder = document.createElement("div");
           sec.appendChild(holder);
           wrap.appendChild(sec);
@@ -2988,11 +3667,48 @@ Pembahasan: penjelasan singkat</pre>
           } else if (isPdf(f)) await renderPdfInto(holder, blob, tok);
           else holder.innerHTML = `<pre class="whitespace-pre-wrap font-sans text-sm">${esc(await blob.text())}</pre>`;
         }
+        if (tok === readToken && m.note) {
+          const n = document.createElement("div");
+          n.className = "border-t border-slate-200 pt-4";
+          n.innerHTML = '<div class="text-xs font-semibold text-slate-500 mb-2">Catatan tambahan</div>' + fmtMateri(m.note);
+          wrap.appendChild(n);
+          typeset(n);
+        }
       }
       function closeMateriRead() {
         readToken++;
         revokeReadUrls();
         $("materiReadModal").classList.add("hidden");
+      }
+      // ----- Tambah teks ke materi (hanya teks; untuk materi file disimpan sebagai catatan di bawah file) -----
+      let materiAddId = null;
+      function openMateriAdd(id) {
+        const m = findMateri(id);
+        if (!m) return;
+        materiAddId = id;
+        $("materiAddInfo").innerText = m.title;
+        $("materiAddInput").value = "";
+        $("materiAddModal").classList.remove("hidden");
+        setTimeout(() => $("materiAddInput").focus(), 50);
+      }
+      function closeMateriAdd() {
+        $("materiAddModal").classList.add("hidden");
+        materiAddId = null;
+      }
+      function saveMateriAdd() {
+        const m = findMateri(materiAddId), t = $("materiAddInput").value.trim();
+        if (!m) { closeMateriAdd(); return; }
+        if (!t) { showToast("Teks tidak boleh kosong.", true); return; }
+        const key = m.mode === "file" ? "note" : "content";
+        m[key] = (m[key] ? m[key].replace(/\s+$/, "") + "\n\n" : "") + t;
+        m.updated = Date.now();
+        saveMateri();
+        const reading = !$("materiReadModal").classList.contains("hidden");
+        const id = materiAddId;
+        closeMateriAdd();
+        renderMateri();
+        if (reading) openMateriRead(id);
+        showToast("Teks ditambahkan.");
       }
       async function deleteMateri(id, fromReader) {
         const m = findMateri(id);
@@ -3052,7 +3768,7 @@ Pembahasan: penjelasan singkat</pre>
           mDraft.files
             .map(
               (f, i) =>
-                `<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2"><span>${isImg(f) ? "\ud83d\uddbc" : "\ud83d\udcc4"}</span><span class="flex-grow min-w-0 truncate">${esc(f.name)}${f.blob ? "" : ' <span class="text-rose-500">(hilang)</span>'}</span><span class="text-slate-400 whitespace-nowrap">${fmtSize(f.size)}</span><button onclick="removeMateriFile(${i})" class="text-slate-400 hover:text-rose-600" aria-label="Hapus file">\u2715</button></div>`,
+                `<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2"><span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide w-8 shrink-0">${isImg(f) ? "Img" : "PDF"}</span><span class="flex-grow min-w-0 truncate">${esc(f.name)}${f.blob ? "" : ' <span class="text-rose-500">(hilang)</span>'}</span><span class="text-slate-400 whitespace-nowrap">${fmtSize(f.size)}</span><button onclick="removeMateriFile(${i})" class="text-slate-400 hover:text-rose-600" aria-label="Hapus file">\u2715</button></div>`,
             )
             .join("") || '<p class="text-slate-400 italic">Belum ada file.</p>';
       }
@@ -3092,7 +3808,7 @@ Pembahasan: penjelasan singkat</pre>
             !(await askConfirm(imgs + " gambar tidak bisa dijadikan teks dan akan dihapus saat materi disimpan. Lanjutkan?", "Lanjutkan", true))
           )
             return;
-          showToast("\u23f3 Mengubah file menjadi teks...");
+          showToast("Mengubah file menjadi teks...");
           try {
             const parts = [];
             for (const f of docs) {
@@ -3176,8 +3892,8 @@ Pembahasan: penjelasan singkat</pre>
         renderMateri();
       }
 
-      // ===== Cadangan data (ekspor/impor) + service worker =====
-      const BACKUP_KEYS = ["tka_master_questions_v2", "tka_master_images_v1", "tka_master_history", "tka_master_materi_v2", "tka_master_stimfiles_v1"];
+      // ===== 10. Cadangan data (ekspor/impor) + service worker =====
+      const BACKUP_KEYS = [KEYS.questions, KEYS.images, KEYS.history, KEYS.materi, KEYS.stimFiles];
       const blobToB64 = (b) =>
         new Promise((res, rej) => {
           const r = new FileReader();
@@ -3196,10 +3912,11 @@ Pembahasan: penjelasan singkat</pre>
       function closeBackup() {
         $("backupModal").classList.add("hidden");
       }
+      // ===== Ekspor / impor cadangan =====
       async function exportBackup() {
         const btn = $("backupExportBtn");
         btn.disabled = true;
-        btn.innerText = "⏳ Menyiapkan...";
+        btn.innerText = "Menyiapkan...";
         try {
           const data = { app: "BELAJAR", version: 1, time: Date.now(), ls: {}, files: {} };
           BACKUP_KEYS.forEach((k) => {
@@ -3230,12 +3947,12 @@ Pembahasan: penjelasan singkat</pre>
           a.click();
           a.remove();
           setTimeout(() => URL.revokeObjectURL(url), 4000);
-          showToast("✅ Cadangan diunduh." + (missing ? " " + missing + " file (materi/stimulus) tidak ditemukan dan tidak ikut." : ""));
+          showToast("Cadangan diunduh." + (missing ? " " + missing + " file (materi/stimulus) tidak ditemukan dan tidak ikut." : ""));
         } catch (err) {
           showToast("Gagal membuat cadangan: " + (err && err.message ? err.message : err), true);
         }
         btn.disabled = false;
-        btn.innerText = "⬇ Unduh Cadangan";
+        btn.innerText = "Unduh Cadangan";
       }
       async function importBackup(e) {
         const file = e.target.files[0];
@@ -3259,7 +3976,7 @@ Pembahasan: penjelasan singkat</pre>
             else localStorage.removeItem(k);
           });
           for (const [id, f] of Object.entries(data.files || {})) await idbPut(id, b64ToBlob(f.data, f.type));
-          showToast("✅ Data dipulihkan. Memuat ulang...");
+          showToast("Data dipulihkan. Memuat ulang...");
           setTimeout(() => location.reload(), 900);
         } catch (err) {
           showToast("Gagal memulihkan (penyimpanan penuh?): " + (err && err.message ? err.message : err), true);
