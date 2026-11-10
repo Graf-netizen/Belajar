@@ -942,6 +942,10 @@ Pembahasan: penjelasan singkat</pre>
         },
       };
 
+      // Semua PDF dibuka lewat openPdf(). isEvalSupported:false menutup celah CVE-2024-4367:
+      // pdf.js versi lama bisa menjalankan kode dari PDF berbahaya. Jangan memanggil getDocument langsung.
+      const openPdf = (data) => pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
+
       // ===== 2. Pola soal & data contoh =====
       // (Pengaturan pola soal: ubah di sini)
       // >>> BISA DIGANTI: PER_STIMULUS = jumlah soal per stimulus Bahasa Indonesia, MTK_PER_STIMULUS = untuk Matematika
@@ -1912,7 +1916,7 @@ Pembahasan: penjelasan singkat</pre>
         if (!(file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) return await file.text();
         if (!window.pdfjsLib) throw new Error("Pembaca PDF belum termuat. Periksa koneksi internet lalu muat ulang halaman.");
         try {
-          const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+          const pdf = await openPdf(await file.arrayBuffer());
           const pages = [];
           for (let p = 1; p <= pdf.numPages; p++) {
             const page = await pdf.getPage(p),
@@ -2240,7 +2244,7 @@ Pembahasan: penjelasan singkat</pre>
         const pics = [...new Set(found)]
           .map((n) =>
             imgs[n - 1]
-              ? '<img src="' + imgs[n - 1] + '" alt="Gambar ' + n + '" class="max-w-full h-auto mx-auto rounded-lg border border-slate-200 mb-3 block">'
+              ? '<img src="' + esc(imgs[n - 1]) + '" alt="Gambar ' + n + '" class="max-w-full h-auto mx-auto rounded-lg border border-slate-200 mb-3 block">'
               : '<div class="text-rose-500 italic mb-2">[gambar ' + n + " tidak ditemukan]</div>",
           )
           .join("");
@@ -2286,7 +2290,7 @@ Pembahasan: penjelasan singkat</pre>
           pendingImages
             .map(
               (src, i) =>
-                `<div class="relative"><img src="${src}" alt="Gambar ${i + 1}" class="h-16 w-16 object-cover rounded border border-slate-300"><span class="absolute bottom-0 left-0 bg-slate-900/70 text-white text-[10px] px-1 rounded-tr">#${i + 1}</span><button onclick="removePendingImage(${i})" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-rose-600 text-white text-[10px]" aria-label="Hapus gambar">✕</button></div>`,
+                `<div class="relative"><img src="${esc(src)}" alt="Gambar ${i + 1}" class="h-16 w-16 object-cover rounded border border-slate-300"><span class="absolute bottom-0 left-0 bg-slate-900/70 text-white text-[10px] px-1 rounded-tr">#${i + 1}</span><button onclick="removePendingImage(${i})" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-rose-600 text-white text-[10px]" aria-label="Hapus gambar">✕</button></div>`,
             )
             .join("") || '<span class="text-slate-400">Belum ada gambar.</span>';
       }
@@ -2399,7 +2403,7 @@ Pembahasan: penjelasan singkat</pre>
       async function countPdfPages(f) {
         if (isImg(f)) return 1;
         if (!window.pdfjsLib) throw new Error("pembaca PDF belum termuat, periksa koneksi internet");
-        const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+        const pdf = await openPdf(await f.arrayBuffer());
         const n = pdf.numPages;
         try { pdf.destroy(); } catch (e) {}
         return n;
@@ -2482,7 +2486,7 @@ Pembahasan: penjelasan singkat</pre>
         const k = "pdf:" + f.id;
         if (!stimCache[k]) {
           if (!window.pdfjsLib) return Promise.reject(new Error("Pembaca PDF belum termuat. Periksa koneksi internet."));
-          stimCache[k] = stimBlob(f).then((b) => b.arrayBuffer()).then((buf) => pdfjsLib.getDocument({ data: buf }).promise);
+          stimCache[k] = stimBlob(f).then((b) => b.arrayBuffer()).then(openPdf);
           stimCache[k].catch(() => { delete stimCache[k]; });
         }
         return stimCache[k];
@@ -2918,7 +2922,7 @@ Pembahasan: penjelasan singkat</pre>
     <div data-b="opts">${mgLbl("Pilihan / pernyataan (satu per baris)")}<textarea data-f="options" rows="5" class="${MG_F}">${esc(q.options.join("\n"))}</textarea></div>
     <div>${mgLbl("Kunci jawaban")}<input data-f="key" value="${esc(mgKeyText(q))}" class="${MG_F}"/><p data-r="hint" class="text-slate-400 mt-1"></p></div>
     <div>${mgLbl("Pembahasan")}<textarea data-f="disc" rows="2" class="${MG_F}">${esc(q.discussion)}</textarea></div>
-    <button onclick="mgDelQ('${esc(q.id)}')" class="text-rose-600 hover:underline">Hapus soal ini</button>
+    <button data-id="${esc(q.id)}" onclick="mgDelQ(this.dataset.id)" class="text-rose-600 hover:underline">Hapus soal ini</button>
   </div></details>`;
       }
       function mgSync(d) {
@@ -3421,10 +3425,10 @@ Pembahasan: penjelasan singkat</pre>
           ? `${nDoc} file${nImg ? " \u00b7 " + nImg + " gambar" : ""}`
           : "Teks";
         const kind = !fileMode ? "TXT" : nDoc ? "PDF" : "IMG";
-        return `<div class="bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition" onclick="openMateriRead('${m.id}')">
+        return `<div class="bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:shadow-md transition" data-id="${esc(m.id)}" onclick="openMateriRead(this.dataset.id)">
     <div class="w-10 h-10 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-bold flex items-center justify-center">${kind}</div>
     <div class="min-w-0 flex-grow"><div class="font-semibold text-sm truncate">${esc(m.title)}</div><div class="text-[11px] text-slate-400">${folderName ? esc(folderName) + " \u00b7 " : ""}${badge} \u00b7 Diubah ${esc(new Date(m.updated).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }))}</div></div>
-    <button onclick="materiMenu(event, '${m.id}')" class="kebab-btn" aria-label="Opsi materi">\u22ee</button></div>`;
+    <button data-id="${esc(m.id)}" onclick="materiMenu(event, this.dataset.id)" class="kebab-btn" aria-label="Opsi materi">\u22ee</button></div>`;
       }
       // Isi menu ⋮ per materi / folder. Item "Hapus" selalu ditambahkan otomatis oleh kebab().
       // Mau tambah aksi baru? Cukup tambah satu baris { label, fn } di sini.
@@ -3452,8 +3456,8 @@ Pembahasan: penjelasan singkat</pre>
             .map((x) => {
               const last = x.items.length ? Math.max(...x.items.map((m) => m.updated || 0)) : 0;
               const initial = esc((x.name.trim()[0] || "?").toUpperCase());
-              return `<div class="relative bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:shadow-md transition" onclick="openMateriFolder('${x.id}')">
-      <button onclick="folderMenu(event, '${x.id}')" class="kebab-btn absolute top-1 right-1" aria-label="Opsi folder">\u22ee</button>
+              return `<div class="relative bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:shadow-md transition" data-id="${esc(x.id)}" onclick="openMateriFolder(this.dataset.id)">
+      <button data-id="${esc(x.id)}" onclick="folderMenu(event, this.dataset.id)" class="kebab-btn absolute top-1 right-1" aria-label="Opsi folder">\u22ee</button>
       <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 font-bold text-sm flex items-center justify-center mb-3">${initial}</div>
       <div class="text-sm font-semibold line-clamp-2 break-words pr-3">${esc(x.name)}</div>
       <div class="text-[11px] text-slate-400 mt-0.5">${x.items.length} materi${last ? " \u00b7 " + new Date(last).toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : ""}</div></div>`;
@@ -3589,7 +3593,7 @@ Pembahasan: penjelasan singkat</pre>
           return;
         }
         try {
-          const pdf = await pdfjsLib.getDocument({ data: await blob.arrayBuffer() }).promise;
+          const pdf = await openPdf(await blob.arrayBuffer());
           const io = new IntersectionObserver(
             (es) =>
               es.forEach((e) => {
@@ -3954,6 +3958,79 @@ Pembahasan: penjelasan singkat</pre>
         btn.disabled = false;
         btn.innerText = "Unduh Cadangan";
       }
+      // ----- Validasi isi file cadangan -----
+      // Cadangan dari orang lain tidak boleh menyisipkan kode. Fungsi ini menolak bentuk data yang tidak wajar.
+      // Mengembalikan teks alasan penolakan, atau null bila cadangan aman dipulihkan.
+      const SAFE_IMG = /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]*$/;
+      const SAFE_MIME = /^[\w.+-]+\/[\w.+-]+$/;
+      const isNum = (v) => typeof v === "number" && isFinite(v);
+      const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+      function validateBackup(data) {
+        const bad = (msg) => { throw new Error(msg); };
+        try {
+          const ls = {};
+          BACKUP_KEYS.forEach((k) => {
+            const raw = data.ls[k];
+            if (raw === undefined || raw === null) return;
+            if (typeof raw !== "string") bad("format data salah");
+            ls[k] = JSON.parse(raw);
+          });
+          const q = ls[KEYS.questions];
+          if (q !== undefined) {
+            if (!isObj(q)) bad("data soal");
+            ["indo", "mtk"].forEach((sj) => {
+              if (q[sj] === undefined) return;
+              if (!Array.isArray(q[sj]) || !q[sj].every(isObj)) bad("data soal");
+            });
+          }
+          const img = ls[KEYS.images];
+          if (img !== undefined) {
+            if (!isObj(img)) bad("data gambar");
+            Object.values(img).forEach((arr) => {
+              if (!Array.isArray(arr) || !arr.every((u) => typeof u === "string" && SAFE_IMG.test(u))) bad("gambar bukan data gambar yang sah");
+            });
+          }
+          const stim = ls[KEYS.stimFiles];
+          if (stim !== undefined) {
+            if (!isObj(stim)) bad("data stimulus");
+            Object.values(stim).forEach((v) => {
+              if (!isObj(v) || !Array.isArray(v.files) || !v.files.every(isObj)) bad("data stimulus");
+            });
+          }
+          const hist = ls[KEYS.history];
+          if (hist !== undefined) {
+            if (!Array.isArray(hist)) bad("data riwayat");
+            hist.forEach((h) => {
+              if (!isObj(h)) bad("data riwayat");
+              ["time", "total", "correct", "wrong", "blank", "ragu", "score", "seconds"].forEach((f) => {
+                if (h[f] != null && !isNum(h[f])) bad("angka riwayat tidak wajar"); // null (dari NaN) tidak berbahaya
+              });
+              if (h.detail !== undefined) {
+                if (!Array.isArray(h.detail)) bad("detail riwayat");
+                h.detail.forEach((d) => {
+                  if (!isObj(d) || !isNum(d.n) || !["Benar", "Salah", "Kosong"].includes(d.s)) bad("detail riwayat tidak wajar");
+                });
+              }
+            });
+          }
+          const mat = ls[KEYS.materi];
+          if (mat !== undefined) {
+            if (!isObj(mat) || !Array.isArray(mat.folders)) bad("data materi");
+            mat.folders.forEach((f) => {
+              if (!isObj(f) || !Array.isArray(f.items) || !f.items.every(isObj)) bad("data materi");
+            });
+          }
+          if (data.files !== undefined) {
+            if (!isObj(data.files)) bad("data file");
+            Object.values(data.files).forEach((f) => {
+              if (!isObj(f) || typeof f.data !== "string" || typeof f.type !== "string" || !SAFE_MIME.test(f.type)) bad("data file");
+            });
+          }
+          return null;
+        } catch (e) {
+          return e && e.message ? e.message : "data tidak valid";
+        }
+      }
       async function importBackup(e) {
         const file = e.target.files[0];
         e.target.value = "";
@@ -3967,6 +4044,11 @@ Pembahasan: penjelasan singkat</pre>
         }
         if (!data || data.app !== "BELAJAR" || typeof data.ls !== "object") {
           showToast("File ini bukan cadangan BELAJAR.", true);
+          return;
+        }
+        const reason = validateBackup(data);
+        if (reason) {
+          showToast("Cadangan ditolak karena isinya tidak wajar (" + reason + "). Data Anda tidak diubah.", true);
           return;
         }
         if (!(await askConfirm("Semua data di perangkat ini akan diganti dengan isi cadangan. Lanjutkan?", "Pulihkan", true))) return;

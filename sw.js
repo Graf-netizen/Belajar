@@ -1,5 +1,5 @@
 // Service worker BELAJAR. Naikkan VERSION setiap kali index.html diperbarui agar cache lama dibuang.
-const VERSION = 'belajar-v1';
+const VERSION = 'belajar-v2';
 const LOCAL = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'];
 const LIBS = [
   'https://cdn.tailwindcss.com/3.4.17',
