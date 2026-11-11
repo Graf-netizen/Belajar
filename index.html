@@ -118,6 +118,8 @@
       .dark-mode .bg-white { background: #111b2e !important; }
       .dark-mode .bg-slate-50 { background: #0e1627 !important; }
       .dark-mode .bg-slate-100 { background: #1a2438 !important; }
+      .dark-mode .bg-slate-200 { background: #26334d !important; }
+      .dark-mode .hover\:bg-slate-300:hover { background: #31415f !important; }
       .dark-mode .hover\:bg-slate-50:hover { background: #16203a !important; }
       .dark-mode .hover\:bg-slate-100:hover, .dark-mode .hover\:bg-slate-200:hover { background: #243250 !important; }
       .dark-mode .text-slate-800, .dark-mode .text-slate-700, .dark-mode .text-slate-600 { color: #e5e9f0 !important; }
@@ -150,6 +152,7 @@
       .dark-mode .text-amber-700 { color: #fbbf24 !important; }
       .dark-mode .bg-amber-100 { background: rgba(245, 158, 11, 0.2) !important; }
       .dark-mode .bg-emerald-50 { background: rgba(16, 185, 129, 0.14) !important; }
+      .dark-mode .bg-emerald-100 { background: rgba(16, 185, 129, 0.22) !important; }
       .dark-mode .text-emerald-700 { color: #6ee7b7 !important; }
       .dark-mode .text-emerald-600 { color: #34d399 !important; }
       .dark-mode .bg-rose-100 { background: rgba(244, 63, 94, 0.18) !important; }
@@ -2078,11 +2081,17 @@ Pembahasan: penjelasan singkat</pre>
         });
         const score = currentQuestions.length ? Math.round((correct / currentQuestions.length) * 100) : 0;
         countUp($("scoreDisplay"), score);
+        const pkgMap = new Map();
+        currentQuestions.forEach((q) => {
+          const nm = (q.packageName || "Soal Demo") + (isRetry ? " (Ulangi)" : "");
+          if (!pkgMap.has(nm)) pkgMap.set(nm, q.packageId || q.id);
+        });
         examHistory.unshift({
           id: "h_" + Date.now(),
           time: Date.now(),
           subject: currentSubject,
-          packages: [...new Set(currentQuestions.map((q) => (q.packageName || "Soal Demo") + (isRetry ? " (Ulangi)" : "")))],
+          packages: [...pkgMap.keys()],
+          pkgIds: [...pkgMap.values()],
           total: currentQuestions.length,
           correct, wrong, blank, ragu, score, detail,
           seconds: Math.round((Date.now() - startTime) / 1000),
@@ -3310,7 +3319,11 @@ Pembahasan: penjelasan singkat</pre>
         if (!u) return;
         if (f === "name") {
           const n = t.value.trim();
-          if (n) questionsData[mg.subject].forEach((q) => { if ((q.packageId || q.id) === mg.pkg) q.packageName = n; });
+          if (n) {
+            const first = questionsData[mg.subject].find((q) => (q.packageId || q.id) === mg.pkg);
+            renameInHistory(mg.pkg, first && first.packageName, n);
+            questionsData[mg.subject].forEach((q) => { if ((q.packageId || q.id) === mg.pkg) q.packageName = n; });
+          }
           return mgSaved();
         }
         if (f === "stim") {
@@ -4491,6 +4504,25 @@ Pembahasan: penjelasan singkat</pre>
         requestAnimationFrame(step);
       }
 
+
+      // Ganti nama paket di Kelola Soal -> nama di Riwayat ikut berubah.
+      // Cocok lewat id paket (riwayat baru); riwayat lama dicocokkan lewat nama lama.
+      function renameInHistory(pkgId, oldName, newName) {
+        if (!oldName || oldName === newName || !Array.isArray(examHistory)) return;
+        let changed = false;
+        examHistory.forEach((h) => {
+          if (!h || !Array.isArray(h.packages)) return;
+          const byId = Array.isArray(h.pkgIds) && h.pkgIds.length === h.packages.length;
+          h.packages = h.packages.map((p, i) => {
+            const base = String(p).replace(/ \(Ulangi\)$/, ""), suf = String(p).slice(base.length);
+            const hit = byId ? h.pkgIds[i] === pkgId : base === oldName;
+            if (hit && base !== newName) { changed = true; return newName + suf; }
+            return p;
+          });
+        });
+        if (changed) saveHistory();
+      }
+
       // ===== Statistik per jenis soal (Riwayat) =====
       function renderTypeStats(items) {
         const by = {};
@@ -4538,7 +4570,9 @@ Pembahasan: penjelasan singkat</pre>
         el.classList.toggle("hidden", n < 1);
         if (n < 1) return;
         const flame = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 3.5 5 5.5 5 10.5A5 5 0 0 1 7 13c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-10z"/></svg>';
-        el.innerHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold">${flame}${n} hari berturut-turut${today ? "" : " · belajar hari ini untuk melanjutkan"}</span>`;
+        // Menyala (kuning) hanya bila hari ini sudah menyelesaikan ujian; selain itu redup (abu-abu)
+        const cls = today ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-400";
+        el.innerHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${cls} text-xs font-semibold">${flame}${n} hari berturut-turut${today ? "" : " · kerjakan soal hari ini agar tetap menyala"}</span>`;
       }
 
       // ===== Pengingat cadangan data (beranda) =====
