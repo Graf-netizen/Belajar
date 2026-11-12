@@ -137,7 +137,11 @@
       .dark-mode .bg-indigo-50\/50 { background: rgba(96, 150, 220, 0.08) !important; }
       .dark-mode .border-indigo-200 { border-color: rgba(111, 155, 209, 0.35) !important; }
       .dark-mode .text-indigo-900 { color: #dce8f7 !important; }
-      .dark-mode .text-indigo-600 { color: #9db9e0 !important; }
+      .dark-mode .text-indigo-600, .dark-mode .text-indigo-700 { color: #9db9e0 !important; }
+      .dark-mode .text-amber-600 { color: #fbbf24 !important; }
+      .dark-mode .bg-slate-300 { background: #3b4a67 !important; }
+      .dark-mode .donut-track { stroke: #26334d; }
+      .dark-mode .donut-text { fill: #e5e9f0; }
       .dark-mode .hover\:bg-indigo-100:hover { background: rgba(96, 150, 220, 0.28) !important; }
       .dark-mode .bg-indigo-600, .dark-mode .bg-indigo-500 { background-color: #2c5282 !important; }
       .dark-mode .hover\:bg-indigo-700:hover { background-color: #36629b !important; }
@@ -226,6 +230,11 @@
       }
       #stimulusContainer.stim-full .stim-viewport { flex: 1 1 0; height: auto; min-height: 0; }
       .dark-mode #stimulusContainer.stim-full { background: #0b1220; }
+      /* Ketuk stimulus untuk membuka satu halaman penuh */
+      #stimulusContainer.stim-file:not(.stim-full) .stim-viewport { cursor: zoom-in; }
+      #stimulusContainer[data-has="1"]:not(.stim-file):not(.stim-full) { cursor: zoom-in; }
+      #stimulusContainer.stim-full:not(.stim-file) { font-size: 1rem; line-height: 1.75; overflow-y: auto; padding-inline: max(1rem, calc((100% - 48rem) / 2)) !important; }
+      #stimulusContainer.stim-full:not(.stim-file) img { max-width: 100%; height: auto; }
 
       /* ===== Mode tinjau soal ragu-ragu: latar kuning tipis ===== */
       body.revisit-mode { background: #fef9c3; }
@@ -578,6 +587,7 @@
             </section>
             <section class="space-y-2">
               <h3 class="font-bold text-sm">Paket Tersimpan <span class="font-normal text-slate-400">· ketuk untuk mengedit</span></h3>
+              <input id="customSearch" type="search" autocomplete="off" placeholder="Cari paket atau isi soal..." aria-label="Cari paket tersimpan" oninput="renderCustomList()" class="hidden w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white" />
               <div id="customQuestionsList" class="space-y-2"></div>
             </section>
           </div>
@@ -587,6 +597,10 @@
         <div id="settingsView" class="hidden max-w-2xl mx-auto w-full space-y-4">
           <h2 class="text-xl font-bold">Pengaturan</h2>
           <div class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
+            <div id="installWrap" class="hidden">
+              <button class="set-row" onclick="installApp()"><span>Pasang Aplikasi<span class="block text-[11px] font-normal text-slate-400">Buka dari layar utama seperti aplikasi biasa</span></span><span class="text-xs font-semibold text-indigo-600">Pasang</span></button>
+              <p id="installHelp" class="hidden px-4 pb-3 text-xs text-slate-500 leading-relaxed"></p>
+            </div>
             <button class="set-row" onclick="toggleDarkMode()"><span>Tema</span><span class="theme-label text-xs text-slate-400">Terang</span></button>
             <div class="px-4 py-3">
               <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium">Ukuran Teks</span><span class="fs-label text-xs text-slate-400">Normal</span></div>
@@ -671,7 +685,7 @@
 
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center hidden p-4">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 space-y-4">
-        <p id="confirmMsg" class="text-sm text-slate-700"></p>
+        <p id="confirmMsg" class="text-sm text-slate-700" style="white-space:pre-line"></p>
         <div class="flex justify-end gap-2">
           <button id="confirmNo" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg">Batal</button>
           <button id="confirmYes" class="px-4 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg">Ya</button>
@@ -1152,10 +1166,54 @@ Pembahasan: penjelasan singkat</pre>
       // Rumus: render LaTeX ($...$) memakai MathJax, berurutan agar tidak bentrok.
       const mjPending = new Set();
       // ===== 3. Rumus matematika & tampilan teks =====
+      // Bila MathJax tidak termuat (mis. offline), rumus ditampilkan dalam bentuk teks sederhana, lalu dikembalikan begitu MathJax siap.
+      let mathOffline = false, mathOfflineTimer = null;
+      const MATH_RE = /\$\$([^$]+)\$\$|\$([^$\n]+)\$/g;
+      function plainTeX(t) {
+        let s = String(t);
+        for (let i = 0; i < 5; i++)
+          s = s
+            .replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, "($1)/($2)")
+            .replace(/\\sqrt\s*\{([^{}]*)\}/g, "√($1)")
+            .replace(/\\text\s*\{([^{}]*)\}/g, "$1");
+        const map = { "\\times": "×", "\\cdot": "·", "\\div": "÷", "\\pi": "π", "\\leq": "≤", "\\le": "≤", "\\geq": "≥", "\\ge": "≥", "\\neq": "≠", "\\approx": "≈", "\\circ": "°", "\\degree": "°", "\\pm": "±", "\\left": "", "\\right": "", "\\quad": " ", "\\%": "%" };
+        s = s.replace(/\\[a-zA-Z]+|\\[,;% ]/g, (m) => (m in map ? map[m] : /^\\[,; ]$/.test(m) ? " " : m.slice(1)));
+        s = s.replace(/\^(\d)(?!\d)|\^\{(\d)\}/g, (m, d1, d2) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d1 || d2]).replace(/\^\{([^{}]*)\}/g, "^($1)").replace(/_\{([^{}]*)\}/g, "_$1");
+        s = s.replace(/√\((\w+)\)/g, "√$1").replace(/\(([\w√.,]+)\)\/\(([\w√.,]+)\)/g, "$1/$2").replace(/\/\(([\w.,]+)\)/g, "/$1");
+        return s.replace(/[{}]/g, "").replace(/\s+/g, " ").trim();
+      }
+      const plainMathText = (str) => String(str || "").replace(MATH_RE, (m, a, b) => plainTeX(a || b));
+      function plainifyMath(el) {
+        if (!el || !el.isConnected) return;
+        const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.nodeValue.includes("$") && !(n.parentElement && n.parentElement.closest("script,style,textarea,pre,code")) ? 1 : 2) });
+        const nodes = [];
+        while (w.nextNode()) nodes.push(w.currentNode);
+        if (!el._mathNodes) el._mathNodes = [];
+        nodes.forEach((n) => {
+          const orig = n.nodeValue, plain = plainMathText(orig);
+          if (plain !== orig) { el._mathNodes.push([n, orig, plain]); n.nodeValue = plain; }
+        });
+      }
+      function restoreMath(el) {
+        (el._mathNodes || []).forEach(([n, orig, plain]) => { if (n.isConnected && n.nodeValue === plain) n.nodeValue = orig; });
+        el._mathNodes = [];
+      }
       function typeset(el) {
         if (!el) return;
-        // MathJax belum siap: simpan dulu, diproses begitu siap
-        if (!window.MathJax || !MathJax.typesetPromise) { mjPending.add(el); return; }
+        // MathJax belum siap: simpan dulu, diproses begitu siap; bila lama tidak siap (offline), tampilkan rumus sederhana
+        if (!window.MathJax || !MathJax.typesetPromise) {
+          mjPending.add(el);
+          if (mathOffline) plainifyMath(el);
+          else if (!mathOfflineTimer)
+            mathOfflineTimer = setTimeout(() => {
+              mathOfflineTimer = null;
+              if (window.MathJax && MathJax.typesetPromise) return;
+              mathOffline = true;
+              mjPending.forEach(plainifyMath);
+              try { showToast("Rumus ditampilkan dalam bentuk sederhana karena pustaka rumus belum termuat (offline).", true); } catch (e) {}
+            }, 2500);
+          return;
+        }
         mjq = mjq
           .then(() => {
             if (MathJax.typesetClear) MathJax.typesetClear([el]);
@@ -1164,6 +1222,8 @@ Pembahasan: penjelasan singkat</pre>
           .catch(() => {});
       }
       function afterMathReady() {
+        mathOffline = false;
+        mjPending.forEach(restoreMath);
         ["quizView", "reviewList", "materiReadBody", "detailContent"].forEach((id) => typeset($(id)));
         mjPending.forEach((el) => typeset(el));
         mjPending.clear();
@@ -1920,6 +1980,7 @@ Pembahasan: penjelasan singkat</pre>
         if (q.stimPage) showStimFile(q);
         else {
           hideStimFile();
+          $("stimulusContainer").dataset.has = hasStim ? "1" : "";
           $("stimulusContainer").innerHTML =
             q.stimulus || (packageImages[q.packageId] || []).length
               ? stimHtml(q)
@@ -2429,11 +2490,19 @@ Pembahasan: penjelasan singkat</pre>
         };
       }
 
+      let savingPkg = false;
       async function saveDualFileQuestions() {
+        if (savingPkg) return; // cegah paket ganda bila tombol ditekan dua kali saat file masih disimpan
+        savingPkg = true;
+        const btn = $("mgSaveBtn");
+        if (btn) btn.disabled = true;
         try {
           await saveDualFileQuestionsImpl();
         } catch (err) {
           showToast("Gagal menyimpan: " + (err && err.message ? err.message : err), true);
+        } finally {
+          savingPkg = false;
+          if (btn) btn.disabled = false;
         }
       }
       async function saveDualFileQuestionsImpl() {
@@ -2498,6 +2567,28 @@ Pembahasan: penjelasan singkat</pre>
             warnType = " Jenis soal terdeteksi: " + c("pg") + " PG, " + c("pgk") + " PG Kompleks, " + c("kat") + " PG Kategori (idealnya sama banyak).";
         }
 
+        // Pratinjau: bila ada yang janggal, tampilkan ringkasan hasil baca dan minta persetujuan sebelum menyimpan
+        const reviewN = imported.filter((q) => q.needsReview).length;
+        if (reviewN || warnStim || warnType) {
+          const cnt = {};
+          imported.forEach((q) => { const t = TYPE_SHORT[q.type || "pg"]; cnt[t] = (cnt[t] || 0) + 1; });
+          const stimUsed = new Set(imported.map((q) => (q.stimPage ? "p" + q.stimPage : q.stimulus || "")).filter(Boolean)).size;
+          const lines = [
+            "Hasil baca: " + imported.length + " soal dari " + stimUsed + " stimulus.",
+            Object.entries(cnt).map(([t, n]) => t + ": " + n).join(" · "),
+            "",
+            "Perlu dicek:",
+          ];
+          if (reviewN) lines.push("• " + reviewN + " soal belum terbaca opsi atau kuncinya (bisa dilengkapi setelah disimpan).");
+          if (warnStim) lines.push("•" + warnStim);
+          if (warnType) lines.push("•" + warnType);
+          lines.push("", "Simpan paket sekarang, atau batal dan perbaiki teks soalnya dulu?");
+          if (!(await askConfirm(lines.join("\n"), "Simpan tetap"))) {
+            showToast("Paket belum disimpan. Perbaiki teks soal atau stimulusnya, lalu simpan lagi.");
+            return;
+          }
+        }
+
         if (fileMode) {
           const metas = [];
           try {
@@ -2535,14 +2626,15 @@ Pembahasan: penjelasan singkat</pre>
         renderCustomList();
         toggleRawEdit(false);
         setMgStep(1);
-        $("customQuestionsList").scrollIntoView({ behavior: "smooth", block: "start" });
-
         const review = imported.filter((q) => q.needsReview).length;
+        if (review) setTimeout(() => openMgReview(packageId, review), 0);
+        else $("customQuestionsList").scrollIntoView({ behavior: "smooth", block: "start" });
+
         showToast(
           (lastSaveOk ? "✓ " : "! Belum tersimpan permanen (penyimpanan browser diblokir/penuh). ") +
             "Paket ditambahkan: " + packageName + " (" + imported.length + " soal)." +
             warnStim + warnType + warnImg + imgNote +
-            (review ? " " + review + " soal perlu diperiksa (opsi/kunci belum terbaca), cek di Kelola Soal." : ""),
+            (review ? " " + review + " soal perlu diperiksa (opsi/kunci belum terbaca); editor dibuka pada soal tersebut." : ""),
         );
       }
 
@@ -2762,6 +2854,7 @@ Pembahasan: penjelasan singkat</pre>
         st.innerText = "Membaca file...";
         for (const f of Array.from(e.target.files)) {
           if (!isImg(f) && !isPdf(f)) { bad.push(f.name + " (hanya PDF atau gambar)"); continue; }
+          if (pendingStimFiles.some((x) => x.name === f.name && x.size === f.size)) { bad.push(f.name + " (sudah ada di daftar)"); continue; }
           try {
             pendingStimFiles.push({ file: f, name: f.name, type: isPdf(f) ? "application/pdf" : f.type, size: f.size, pages: await countPdfPages(f) });
           } catch (err) {
@@ -2805,9 +2898,15 @@ Pembahasan: penjelasan singkat</pre>
       }
 
       // --- Penampil stimulus file saat ujian ---
-      let stimZoom = 1, stimTok = 0, paintTok = 0, stimCache = {}, stimUrls = [], lastStimKey = null, stimPaintTimer = null;
+      let stimZoom = 1, stimTok = 0, paintTok = 0, stimCache = {}, stimUrls = [], lastStimKey = null, stimPaintTimer = null, stimTapTimer = null;
       const ZMIN = 0.5, ZMAX = 4;
+      function destroyStimPdfs() {
+        Object.keys(stimCache).forEach((k) => {
+          if (k.startsWith("pdf:")) Promise.resolve(stimCache[k]).then((p) => { try { p.destroy(); } catch (e) {} }).catch(() => {});
+        });
+      }
       function resetStimViewer() {
+        destroyStimPdfs();
         stimUrls.forEach((u) => URL.revokeObjectURL(u));
         stimUrls = [];
         stimCache = {};
@@ -2816,6 +2915,7 @@ Pembahasan: penjelasan singkat</pre>
         hideStimFile();
       }
       function hideStimFile() {
+        clearTimeout(stimTapTimer);
         lastStimKey = null;
         $("stimulusContainer").classList.remove("stim-file", "stim-full");
         $("stimulusTitle").innerText = "Stimulus / Teks Bacaan";
@@ -2836,6 +2936,13 @@ Pembahasan: penjelasan singkat</pre>
           if (!window.pdfjsLib) return Promise.reject(new Error("Pembaca PDF belum termuat. Periksa koneksi internet."));
           stimCache[k] = stimBlob(f).then((b) => b.arrayBuffer()).then(openPdf);
           stimCache[k].catch(() => { delete stimCache[k]; });
+          // simpan paling banyak 2 dokumen PDF terbuka; yang paling lama dilepas dari memori
+          const open = Object.keys(stimCache).filter((x) => x.startsWith("pdf:"));
+          if (open.length > 2) {
+            const old = open[0];
+            Promise.resolve(stimCache[old]).then((p) => { try { p.destroy(); } catch (e) {} }).catch(() => {});
+            delete stimCache[old];
+          }
         }
         return stimCache[k];
       }
@@ -2843,11 +2950,13 @@ Pembahasan: penjelasan singkat</pre>
         const box = $("stimulusContainer"), key = q.packageId + "#" + q.stimPage;
         if (lastStimKey === key && $("stimViewport")) return; // stimulus sama: jangan dimuat ulang (zoom tetap)
         lastStimKey = key;
+        clearTimeout(stimTapTimer);
         stimZoom = 1;
         const tok = ++stimTok;
         paintTok++;
         box.classList.add("stim-file");
         box.classList.remove("stim-full");
+        box.dataset.has = "1";
         $("stimulusTitle").innerText = "Stimulus " + q.stimPage + " · File";
         const bt = "h-8 rounded-lg bg-slate-100 hover:bg-slate-200 font-medium";
         box.innerHTML = `<div class="flex items-center gap-1.5 mb-2 flex-wrap text-xs shrink-0">
@@ -2873,7 +2982,7 @@ Pembahasan: penjelasan singkat</pre>
             let url = stimCache["url:" + f.id];
             if (!url) { url = stimCache["url:" + f.id] = URL.createObjectURL(blob); stimUrls.push(url); }
             if (tok !== stimTok) return;
-            stage.innerHTML = `<img src="${url}" alt="Stimulus" draggable="false" style="width:100%;height:auto;display:block;background:#fff">`;
+            stage.innerHTML = `<img src="${url}" alt="Stimulus" draggable="false" style="width:100%;height:auto;display:block;background:#fff" onerror="this.parentNode.innerHTML='<div class=&quot;p-6 text-center text-rose-500 text-xs&quot;>Gambar tidak bisa ditampilkan (format tidak didukung, mis. HEIC). Ubah ke JPG/PNG lalu unggah ulang.</div>'">`;
           } else {
             const pdf = await stimPdf(f), page = await pdf.getPage(info.page);
             if (tok !== stimTok) return;
@@ -2933,6 +3042,14 @@ Pembahasan: penjelasan singkat</pre>
         const box = $("stimulusContainer");
         const on = force === undefined ? !box.classList.contains("stim-full") : force;
         box.classList.toggle("stim-full", on);
+        if (!box.classList.contains("stim-file")) {
+          const old = $("stimTextClose");
+          if (old) old.remove();
+          if (on) {
+            box.insertAdjacentHTML("afterbegin", '<button type="button" id="stimTextClose" data-z="full" class="sticky top-0 ml-auto mb-3 px-3 h-8 flex items-center rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium shadow-sm">✕ Tutup</button>');
+            box.scrollTop = 0;
+          }
+        }
         const b = $("stimFullBtn");
         if (b) b.innerText = on ? "✕ Tutup layar penuh" : "⤢ Layar penuh";
         setTimeout(paintStimCanvas, 60);
@@ -2968,11 +3085,25 @@ Pembahasan: penjelasan singkat</pre>
         const end = () => { drag = null; vp.style.cursor = ""; };
         vp.addEventListener("pointerup", end);
         vp.addEventListener("pointercancel", end);
-        vp.addEventListener("dblclick", () => setStimZoom(stimZoom > 1.01 ? 1 : 2));
+        vp.addEventListener("dblclick", () => { clearTimeout(stimTapTimer); setStimZoom(stimZoom > 1.01 ? 1 : 2); });
+        // ketuk sekali (bukan geser / cubit / ketuk dua kali) -> buka satu halaman penuh
+        let sx = 0, sy = 0, moved = false;
+        vp.addEventListener("pointerdown", (e) => { sx = e.clientX; sy = e.clientY; moved = false; });
+        vp.addEventListener("pointermove", (e) => { if (Math.hypot(e.clientX - sx, e.clientY - sy) > 6) moved = true; });
+        vp.addEventListener("click", () => {
+          if (moved || $("stimulusContainer").classList.contains("stim-full")) return;
+          clearTimeout(stimTapTimer);
+          stimTapTimer = setTimeout(() => toggleStimFull(true), 280);
+        });
       }
       $("stimulusContainer").addEventListener("click", (e) => {
         const b = e.target.closest("[data-z]");
-        if (!b) return;
+        if (!b) {
+          const box = $("stimulusContainer");
+          // stimulus teks/gambar: ketuk untuk layar penuh (kecuali sedang memilih teks atau menekan tautan)
+          if (box.dataset.has === "1" && !box.classList.contains("stim-file") && !box.classList.contains("stim-full") && !e.target.closest("a, button") && !String(window.getSelection && window.getSelection()).trim()) toggleStimFull(true);
+          return;
+        }
         const a = b.dataset.z;
         if (a === "in") setStimZoom(stimZoom * 1.25);
         else if (a === "out") setStimZoom(stimZoom / 1.25);
@@ -2992,6 +3123,8 @@ Pembahasan: penjelasan singkat</pre>
         const ind = $("targetSubject").value === "indo";
         document.querySelectorAll(".indo-only").forEach((el) => el.classList.toggle("hidden", !ind));
         document.querySelectorAll(".mtk-only").forEach((el) => el.classList.toggle("hidden", ind));
+        const cs = $("customSearch");
+        if (cs) cs.value = "";
         renderCustomList();
       }
       // Kelola Soal = halaman penuh (bukan popup)
@@ -3199,16 +3332,41 @@ Pembahasan: penjelasan singkat</pre>
         setTimeout(() => { btn.innerText = "Salin Prompt"; }, 2200);
       }
 
+      const normSearch = (t) => String(t == null ? "" : t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
       function renderCustomList() {
-        const list = $("customQuestionsList"), units = getUnits($("targetSubject").value);
-        if (!units.length) {
+        const list = $("customQuestionsList"), all = getUnits($("targetSubject").value);
+        const sb = $("customSearch");
+        if (sb) sb.classList.toggle("hidden", all.length < 2);
+        const terms = sb && all.length >= 2 ? normSearch(sb.value).trim().split(" ").filter(Boolean) : [];
+        const hit = (text) => terms.every((t) => text.includes(t));
+        let shown = all;
+        const snip = new Map();
+        if (terms.length) {
+          shown = [];
+          all.forEach((u) => {
+            const nm = normSearch(u.name);
+            if (hit(nm)) { shown.push(u); return; }
+            // cocok lewat isi: stimulus, pertanyaan, atau opsi di dalam paket
+            const hay = normSearch(u.name + " " + u.questions.map((q) => (q.stimulus || "") + " " + (q.question || "") + " " + (q.options || []).join(" ")).join(" "));
+            if (!hit(hay)) return;
+            shown.push(u);
+            const k = u.questions.findIndex((q) => hit(normSearch((q.stimulus || "") + " " + (q.question || "") + " " + (q.options || []).join(" "))));
+            if (k >= 0) snip.set(u.key, "Cocok di soal " + (k + 1) + ": " + String(u.questions[k].question || "").slice(0, 70));
+          });
+        }
+        if (!all.length) {
           list.innerHTML = '<p class="text-slate-400 italic bg-white border border-slate-200 rounded-xl p-6 text-center">Belum ada paket di folder ini.</p>';
           return;
         }
-        list.innerHTML = units
+        if (!shown.length) {
+          list.innerHTML = '<p class="text-slate-400 italic bg-white border border-slate-200 rounded-xl p-6 text-center">Tidak ada paket atau soal yang cocok dengan pencarian.</p>';
+          return;
+        }
+        const count = terms.length ? '<p class="text-[11px] text-slate-400 px-1">' + shown.length + " dari " + all.length + " paket cocok</p>" : "";
+        list.innerHTML = count + shown
           .map(
             (u) => `<button class="mg-pkg w-full text-left bg-white border border-slate-200 rounded-xl px-4 py-3 hover:shadow-md transition flex items-center gap-2" data-k="${esc(u.key)}">
-        <span class="flex-grow min-w-0"><span class="block font-semibold text-sm truncate">${u.questions.some((q) => q.needsReview) ? "! " : ""}${esc(u.name)}</span><span class="text-slate-400">${u.questions.length} soal</span></span><span class="text-slate-400">›</span></button>`,
+        <span class="flex-grow min-w-0"><span class="block font-semibold text-sm truncate">${u.questions.some((q) => q.needsReview) ? "! " : ""}${esc(u.name)}</span><span class="text-slate-400">${u.questions.length} soal</span>${snip.has(u.key) ? `<span class="block text-[11px] text-slate-500 truncate mt-0.5">${esc(snip.get(u.key))}</span>` : ""}</span><span class="text-slate-400">›</span></button>`,
           )
           .join("");
         list.querySelectorAll(".mg-pkg").forEach((b) => { b.onclick = () => openMgEdit(b.dataset.k); });
@@ -3403,15 +3561,21 @@ Pembahasan: penjelasan singkat</pre>
       function saveHistory() {
         setTimeout(() => { try { renderHome(); } catch (e) {} }, 0);
         examHistory = examHistory.slice(0, 200);
+        let trimmed = false;
         for (let i = examHistory.length; i >= 0; i = i > 20 ? i - 20 : i - 1) {
           try {
             localStorage.setItem(KEYS.history, JSON.stringify(examHistory));
+            if (trimmed) {
+              try { showToast("Penyimpanan hampir penuh: rincian soal pada riwayat lama dihapus agar hasil terbaru tetap tersimpan. Unduh cadangan di Pengaturan, lalu hapus data yang tidak dipakai.", true); } catch (e2) {}
+            }
             return;
           } catch (e) {
             // penyimpanan penuh: buang detail dari riwayat terlama lalu coba lagi
+            trimmed = true;
             for (let j = Math.max(1, i - 20); j < examHistory.length; j++) delete examHistory[j].detail;
           }
         }
+        try { showToast("Riwayat ujian gagal disimpan: penyimpanan browser penuh atau diblokir. Unduh cadangan dan kosongkan data yang tidak dipakai.", true); } catch (e3) {}
       }
       function fmtDur(s) {
         const m = Math.floor(s / 60);
@@ -3480,8 +3644,8 @@ Pembahasan: penjelasan singkat</pre>
         const pct = (v) => (all ? Math.round((v / all) * 100) : 0);
         chart.innerHTML = `<div class="flex items-center justify-center gap-6 flex-wrap">
     <svg viewBox="0 0 120 120" class="w-32 h-32" role="img" aria-label="Diagram lingkaran jawaban">
-      <circle cx="60" cy="60" r="${R}" fill="none" stroke="#e2e8f0" stroke-width="18"/>${arcs}
-      <text x="60" y="64" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a5f">${pct(tot.c)}%</text>
+      <circle class="donut-track" cx="60" cy="60" r="${R}" fill="none" stroke="#e2e8f0" stroke-width="18"/>${arcs}
+      <text x="60" y="64" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a5f" class="donut-text">${pct(tot.c)}%</text>
     </svg>
     <div class="space-y-1.5 text-xs">${parts
       .map((p) => `<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${p[2]}"></span><span class="w-12">${p[0]}</span><b>${p[1]}</b><span class="text-slate-400">(${pct(p[1])}%)</span></div>`)
@@ -3545,6 +3709,10 @@ Pembahasan: penjelasan singkat</pre>
       }
       // Rincian seluruh soal (benar, salah, kosong) pada satu riwayat
       function historyDetailHtml(x) {
+        const bar = `<div class="flex gap-2"><button type="button" onclick="shareHistory('${esc(x.id)}')" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium">Bagikan</button><button type="button" onclick="printHistory('${esc(x.id)}')" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium">Simpan PDF</button></div>`;
+        return bar + historyDetailBody(x);
+      }
+      function historyDetailBody(x) {
         if (!Array.isArray(x.detail))
           return '<p class="text-slate-400 italic">Riwayat ini dibuat sebelum rincian jawaban disimpan, jadi rincian soal tidak tersedia. Kerjakan ujian baru untuk melihat rincian.</p>';
         const d = x.detail;
@@ -4445,8 +4613,8 @@ Pembahasan: penjelasan singkat</pre>
         { t: "Selamat datang", h: () => `<p class="text-sm text-slate-600">Aplikasi ini membantu kamu latihan soal dan belajar materi. Semua data tersimpan di perangkatmu sendiri.</p><p class="text-sm text-slate-600 mt-3">Panduan singkat ini menjelaskan fungsi tiap menu. Bisa dibuka lagi kapan saja lewat <b>Pengaturan › Cara Pakai</b>.</p>` },
         { t: "Menu di bagian bawah", h: () => `<div class="space-y-3">${guideNavRows()}</div>` },
         { t: "Cara mulai ujian", h: () => `<ol class="list-decimal pl-5 space-y-2 text-sm text-slate-600"><li>Di <b>Home</b>, pilih pelajaran.</li><li>Pilih <b>paket soal</b>, atur waktu dan opsi acak bila perlu.</li><li>Tekan <b>Mulai Kerjakan</b>.</li></ol><p class="text-xs text-slate-500 mt-3">Belum ada soal? Tambahkan lewat menu <b>Kelola Soal</b>.</p>` },
-        { t: "Saat ujian berlangsung", h: () => `<ul class="space-y-2.5 text-sm text-slate-600"><li><b class="text-slate-800">Ikon kotak + nomor soal:</b> buka daftar soal dan lompat ke nomor mana saja.</li><li><b class="text-slate-800">Waktu:</b> ketuk untuk menyembunyikan atau menampilkan.</li><li><b class="text-slate-800">Ragu-ragu:</b> tandai soal yang ingin ditinjau lagi.</li><li><b class="text-slate-800">Coret jawaban:</b> tekan lama pada pilihan.</li><li><b class="text-slate-800">Titik tiga (⋮):</b> ganti tema dan ukuran teks tanpa keluar dari ujian.</li></ul>` },
-        { t: "Setelah ujian", h: () => `<p class="text-sm text-slate-600">Kamu akan melihat skor, pembahasan, dan jumlah soal benar, salah, kosong, serta ragu.</p><ul class="space-y-2.5 text-sm text-slate-600 mt-3"><li><b class="text-slate-800">Ulangi soal salah:</b> kerjakan lagi hanya soal yang salah atau kosong.</li><li><b class="text-slate-800">Riwayat:</b> pantau perkembangan skormu.</li></ul>` },
+        { t: "Saat ujian berlangsung", h: () => `<ul class="space-y-2.5 text-sm text-slate-600"><li><b class="text-slate-800">Ikon kotak + nomor soal:</b> buka daftar soal dan lompat ke nomor mana saja.</li><li><b class="text-slate-800">Stimulus:</b> ketuk untuk membukanya satu halaman penuh.</li><li><b class="text-slate-800">Waktu:</b> ketuk untuk menyembunyikan atau menampilkan.</li><li><b class="text-slate-800">Ragu-ragu:</b> tandai soal yang ingin ditinjau lagi.</li><li><b class="text-slate-800">Coret jawaban:</b> tekan lama pada pilihan.</li><li><b class="text-slate-800">Titik tiga (⋮):</b> ganti tema dan ukuran teks tanpa keluar dari ujian.</li></ul>` },
+        { t: "Setelah ujian", h: () => `<p class="text-sm text-slate-600">Kamu akan melihat skor, pembahasan, dan jumlah soal benar, salah, kosong, serta ragu.</p><ul class="space-y-2.5 text-sm text-slate-600 mt-3"><li><b class="text-slate-800">Ulangi soal salah:</b> kerjakan lagi hanya soal yang salah atau kosong.</li><li><b class="text-slate-800">Riwayat:</b> pantau perkembangan skormu. Buka satu riwayat untuk membagikannya atau menyimpannya sebagai PDF.</li></ul>` },
       ];
       let guideIdx = 0;
       function renderGuide() {
@@ -4521,6 +4689,121 @@ Pembahasan: penjelasan singkat</pre>
           });
         });
         if (changed) saveHistory();
+      }
+
+
+      // ===== Buka editor paket pada soal yang perlu diperiksa (setelah impor) =====
+      function openMgReview(pkgId, count) {
+        openMgEdit(pkgId);
+        const box = $("mgEdit");
+        if (!box || box.classList.contains("hidden")) return;
+        const u = mgUnit();
+        const ids = u ? u.questions.filter((q) => q.needsReview).map((q) => q.id) : [];
+        if (!ids.length) return;
+        box.insertAdjacentHTML("afterbegin", `<div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800"><b>${ids.length} soal perlu diperiksa.</b> Opsi atau kunci jawabannya belum terbaca. Soal bertanda ! sudah dibuka di bawah; lengkapi lalu perubahan tersimpan otomatis.</div>`);
+        let first = null;
+        ids.forEach((id) => {
+          const d = box.querySelector('details[data-q="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+          if (d) { d.open = true; if (!first) first = d; }
+        });
+        if (first) setTimeout(() => first.scrollIntoView({ behavior: "smooth", block: "center" }), 80);
+      }
+
+      // ===== Ekspor riwayat: bagikan teks / simpan PDF lewat cetak =====
+      const histById = (id) => (Array.isArray(examHistory) ? examHistory : []).find((h) => h.id === id);
+      function histMeta(x) {
+        const d = new Date(x.time);
+        return {
+          title: (x.packages || []).join(", ") || "Ujian",
+          subject: SUBJECT_NAME[x.subject] || x.subject,
+          when: d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) + ", " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+          sum: `Nilai ${x.score} · ${x.correct} benar, ${x.wrong} salah, ${x.blank} kosong, ${x.ragu} ragu · ${fmtDur(x.seconds)}`,
+        };
+      }
+      function histPlain(x) {
+        const m = histMeta(x);
+        let t = `${m.title}\n${m.subject} · ${m.when}\n${m.sum}\n`;
+        if (Array.isArray(x.detail) && x.detail.length) {
+          t += "\n";
+          x.detail.forEach((i) => {
+            t += `${i.n}. [${i.s}] ${plainMathText(i.q)}\n`;
+            if (i.s !== "Benar") t += `   Jawabanmu: ${plainMathText(i.a) || "-"}\n   Kunci: ${plainMathText(i.k) || "-"}\n`;
+          });
+        }
+        return t.trim();
+      }
+      async function shareHistory(id) {
+        const x = histById(id);
+        if (!x) return;
+        const text = histPlain(x), title = "Hasil ujian · " + histMeta(x).title;
+        try {
+          if (navigator.share) { await navigator.share({ title, text }); return; }
+        } catch (e) {
+          if (e && e.name === "AbortError") return;
+        }
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("Hasil disalin. Tempel di aplikasi pesan atau catatan.");
+        } catch (e) {
+          showToast("Tidak bisa membagikan atau menyalin di perangkat ini.", true);
+        }
+      }
+      function printHistory(id) {
+        const x = histById(id);
+        if (!x) return;
+        const m = histMeta(x), e = esc, col = { Benar: "#059669", Salah: "#e11d48", Kosong: "#64748b" };
+        const rows = (Array.isArray(x.detail) ? x.detail : [])
+          .map((i) => `<div class="q"><div><b>${i.n}.</b> ${e(plainMathText(i.q))} <span style="color:${col[i.s] || "#334155"};font-weight:700">[${e(i.s)}]</span></div><div class="s">Jawabanmu: ${e(plainMathText(i.a)) || "-"}</div><div class="s">Kunci: ${e(plainMathText(i.k)) || "-"}</div></div>`)
+          .join("");
+        const html = `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Hasil ujian · ${e(m.title)}</title><style>body{font:14px/1.5 Arial,sans-serif;color:#0f172a;margin:24px}h1{font-size:20px;margin:0 0 4px}.m{color:#475569;margin-bottom:12px}.q{padding:8px 0;border-top:1px solid #e2e8f0;break-inside:avoid}.s{color:#475569;font-size:13px}.n{font-size:34px;font-weight:800;margin:6px 0}</style></head><body><h1>${e(m.title)}</h1><div class="m">${e(m.subject)} · ${e(m.when)}</div><div class="n">${e(String(x.score))}</div><div class="m">${e(m.sum)}</div>${rows || '<p class="m">Rincian soal tidak tersedia untuk riwayat ini.</p>'}</body></html>`;
+        const w = window.open("", "_blank");
+        if (!w) { showToast("Jendela cetak diblokir browser. Izinkan pop-up lalu coba lagi.", true); return; }
+        w.document.write(html);
+        w.document.close();
+        w.focus();
+        setTimeout(() => { try { w.print(); } catch (err) {} }, 350);
+      }
+
+
+      // ===== Pasang sebagai aplikasi (PWA) =====
+      let deferredInstall = null;
+      const isStandalone = () => (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+      const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      function paintInstall() {
+        const w = $("installWrap");
+        if (w) w.classList.toggle("hidden", isStandalone());
+      }
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredInstall = e;
+        paintInstall();
+      });
+      window.addEventListener("appinstalled", () => {
+        deferredInstall = null;
+        paintInstall();
+        try { showToast("Aplikasi terpasang. Cari ikonnya di layar utama."); } catch (e) {}
+      });
+      async function installApp() {
+        const help = $("installHelp");
+        if (deferredInstall) {
+          try {
+            deferredInstall.prompt();
+            await deferredInstall.userChoice;
+          } catch (e) {}
+          deferredInstall = null;
+          help.classList.add("hidden");
+          return;
+        }
+        help.innerText = isIOS()
+          ? "Di Safari, ketuk tombol Bagikan (kotak dengan panah ke atas), lalu pilih “Tambah ke Layar Utama”."
+          : /^https?:$/.test(location.protocol)
+            ? "Buka menu browser (⋮ atau ⋯), lalu pilih “Pasang aplikasi” atau “Tambahkan ke layar utama”. Bila pilihan itu tidak ada, muat ulang halaman lalu coba lagi."
+            : "Pemasangan hanya bisa dilakukan saat halaman dibuka lewat alamat web (https), bukan dari file di perangkat.";
+        help.classList.toggle("hidden");
+      }
+      document.addEventListener("DOMContentLoaded", paintInstall);
+      if (window.matchMedia) {
+        try { matchMedia("(display-mode: standalone)").addEventListener("change", paintInstall); } catch (e) {}
       }
 
       // ===== Statistik per jenis soal (Riwayat) =====
